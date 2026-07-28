@@ -67,7 +67,7 @@ app.use("/api/auth", user);  // Your auth routes including signup
 app.use("/api/login", login);
 app.use("/api/forgot-password", forgotPassword);
 app.use("/api/reset-password", verifyPasswordReset);
-
+app.use("/api", user);
 // ✅ Error handling middleware (optional but recommended)
 app.use((err: any, req: any, res: any, next: any) => {
   console.error("Error:", err);

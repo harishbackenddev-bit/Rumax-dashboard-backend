@@ -9,9 +9,12 @@ import { generatePasswordResetToken, getPasswordResetTokenByToken, generatePassw
 import { generatePasswordResetTokenByPhoneWithTwilio } from "../../utils/sms/sms"
 import { passwordResetTokenModel } from "src/models/password-token-schema";
 import { usersModel } from "src/models/user/user-schema";
-import { expertsModel } from "src/models/experts/expert-schema";
 import { customAlphabet } from "nanoid"
-import { workshopModel } from "src/models/workshop/workshop-schema";
+import { roleModel } from "../../models/roles/roles-schema";
+import { defaultRoles, IDefaultRole } from "../../utils/defaultRoles";
+import { jobModel, IJob } from "../../models/job/job-schema";
+import { applicationModel } from "../../models/job/application-schema";
+import { candidateModel } from "../../models/candidate/candidate-schema";
 
 export const loginService = async (payload: any, res: Response) => {
     const { username, password } = payload;
@@ -180,6 +183,8 @@ export const updateAUserService = async (id: string, payload: any, res: Response
 };
 
 
+
+
 export const deleteAUserService = async (id: string, res: Response) => {
     // const user = await usersModel.findById(id);
     // if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
@@ -214,6 +219,53 @@ export const updateAProfileService = async (payload: any, res: Response) => {
     success: true,
     message: "User data retrieved successfully",
     data: updateduser
+  };
+};
+
+export const getUserInfoService = async (id: string, res: Response) => {
+  const user = await usersModel.findById(id);
+  if (!user)
+    return errorResponseHandler(
+      "User not found",
+      httpStatusCode.NOT_FOUND,
+      res
+    );
+
+  return {
+    success: true,
+    message: "User retrieved successfully",
+    data: {
+      user,
+    },
+  };
+};
+
+export const createuserService = async (payload: any, res: Response) => {
+  // Check if the email already exists
+  const existingUser = await usersModel.findOne({ email: payload.email });
+
+  if (existingUser) {
+    return errorResponseHandler(
+      "Email already exists",
+      httpStatusCode.BAD_REQUEST,
+      res
+    );
+  }
+
+  // Proceed with creating the user
+  const currentUserId = payload.currentUser;
+
+  const identifier = customAlphabet("0123456789", 3);
+  payload.identifier = identifier();
+  const user = new usersModel({
+    ...payload,
+  });
+
+  await user.save();
+
+  return {
+    success: true,
+    message: "User created successfully",
   };
 };
 
@@ -262,233 +314,6 @@ export const updateAPasswordService = async (payload: any, res: Response) => {
 };
 
 
-export const getExpertsService = async (payload: any, res: Response) => {
-  const experts = await expertsModel.find();
-
-  return {
-    success: true,
-    message: "Experts fetched successfully",
-    data: experts,
-  };
-};
-
-
-export const createExpertsService = async (
-  body: any,
-  res: Response
-) => {
-  try {
-    const identifier = customAlphabet("0123456789", 3);
-
-    // Check if expert with same email already exists
-    if (body.email) {
-      const existingExpert = await expertsModel.findOne({ 
-        email: body.email 
-      });
-      
-      if (existingExpert) {
-        return {
-          success: false,
-          message: "An expert with this email already exists",
-          data: null,
-        };
-      }
-    }
-
-    // Create new expert with generated identifier
-    const expert = await expertsModel.create({
-      ...body,
-      identifier: identifier(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-
-    return {
-      success: true,
-      message: "Expert created successfully",
-      data: expert,
-    };
-  } catch (error: any) {
-    console.error("Error creating expert:", error);
-    return {
-      success: false,
-      message: error.message || "Failed to create expert",
-      data: null,
-    };
-  }
-};
-
-export const updateAExpertsService = async (
-  id: string,
-  body: any,
-  res: Response
-) => {
-  try {
-    // Check if expert exists
-    const existingExpert = await expertsModel.findById(id);
-    
-    if (!existingExpert) {
-      return {
-        success: false,
-        message: "Expert not found",
-        data: null,
-      };
-    }
-
-    // Check if email is being changed and if it's already taken
-    if (body.email && body.email !== existingExpert.email) {
-      const emailExists = await expertsModel.findOne({ 
-        email: body.email,
-        _id: { $ne: id } // Exclude current expert
-      });
-      
-      if (emailExists) {
-        return {
-          success: false,
-          message: "Email is already taken by another expert",
-          data: null,
-        };
-      }
-    }
-
-    // Update expert
-    const expert = await expertsModel.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          ...body,
-          updatedAt: new Date(),
-        },
-      },
-      {
-        new: true, // Return updated document
-        runValidators: true, // Run schema validators
-      }
-    );
-
-    return {
-      success: true,
-      message: "Expert updated successfully",
-      data: expert,
-    };
-  } catch (error: any) {
-    console.error("Error updating expert:", error);
-    return {
-      success: false,
-      message: error.message || "Failed to update expert",
-      data: null,
-    };
-  }
-};
-
-export const deleteAExpertsService = async (id: string, res: Response) => {
-    const user = await expertsModel.findById(id);
-    if (!user) return errorResponseHandler("Expert not found", httpStatusCode.NOT_FOUND, res);
-
-    // Delete user ----
-    await expertsModel.findByIdAndDelete(id)
-
-    return {
-        success: true,
-        message: "Expert deleted successfully"
-    }
-}
-
-export const getAllworkshopService = async (payload: any, res: Response) => {
-  const userId = payload.userId;
-  // console.log("userIdpayload", userId);
-  const user = await workshopModel.find();
-
-  return {
-    success: true,
-    message: "Workshops fetched successfully",
-    data: user
-  };
-}
-
-
-export const getAworkshopService = async (
-  id: string,
-  body: any,
-  res: Response
-) => {
-  try {
-    // Check if expert exists
-    const existingworkshop = await workshopModel.findById(id);
-    
-    if (!existingworkshop) {
-      return {
-        success: false,
-        message: "Workshop not found",
-        data: null,
-      };
-    }
-
-
-    return {
-      success: true,
-      message: "workshop fetched successfully",
-      data: existingworkshop,
-    };
-  } catch (error: any) {
-    console.error("Error fetched workshop:", error);
-    return {
-      success: false,
-      message: error.message || "Failed to fetched workshop",
-      data: null,
-    };
-  }
-};
-
-
-export const updateAworkshopService = async (
-  id: string,
-  body: any,
-  res: Response
-) => {
-  try {
-    // Check if workshop exists
-    const existingExpert = await workshopModel.findById(id);
-    
-    if (!existingExpert) {
-      return {
-        success: false,
-        message: "workshop not found",
-        data: null,
-      };
-    }
-
-    // Update workshop
-    const workshop = await workshopModel.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          ...body,
-          updatedAt: new Date(),
-        },
-      },
-      {
-        new: true, // Return updated document
-        runValidators: true, // Run schema validators
-      }
-    );
-
-    return {
-      success: true,
-      message: "workshop updated successfully",
-      data: workshop,
-    };
-  } catch (error: any) {
-    console.error("Error updating workshop:", error);
-    return {
-      success: false,
-      message: error.message || "Failed to update workshop",
-      data: null,
-    };
-  }
-};
-
-
 
 // Dashboard
 
@@ -500,21 +325,678 @@ export const getDashboardStatsService = async (payload: any, res: Response) => {
     return currentDate;
 };
 
+// Get all roles
+export const getRolesService = async (req: any, res: Response) => {
+  try {
+    const roles = await roleModel.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .select("-__v");
+
+    return {
+      success: true,
+      message: "Roles retrieved successfully",
+      data: roles,
+      count: roles.length
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to fetch roles",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Get single role by ID
+export const getAroleService = async (id: string, res: Response) => {
+  try {
+    const role = await roleModel.findById(id).select("-__v");
+    
+    if (!role) {
+      return errorResponseHandler("Role not found", httpStatusCode.NOT_FOUND, res);
+    }
+
+    return {
+      success: true,
+      message: "Role retrieved successfully",
+      data: role
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to fetch role",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+export const createRoleService = async (
+  payload: any,
+  res: Response
+) => {
+  try {
+    // Log payload for debugging
+    console.log('Create Role Payload:', JSON.stringify(payload, null, 2));
+
+    // Check if payload exists
+    if (!payload) {
+      return errorResponseHandler(
+        "Request body is empty",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    // Extract data from payload - handle the structure: { userId, body }
+    const body = payload.body || payload;
+    const userId = payload.userId || "system";
+    const { name, description, color, permissions } = body;
+
+    // Validate required fields
+    if (!name) {
+      return errorResponseHandler(
+        "Role name is required",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      return errorResponseHandler(
+        "Role name cannot be empty",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    // Check if role already exists
+    const existingRole = await roleModel.findOne({
+      name: trimmedName
+    });
+
+    if (existingRole) {
+      return errorResponseHandler(
+        `Role "${trimmedName}" already exists`,
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    // Create new role
+    const newRole = new roleModel({
+      name: trimmedName,
+      description: description || null,
+      color: color || "#2563EB",
+      permissions: permissions || [],
+      createdBy: userId,
+      isActive: true
+    });
+
+    await newRole.save();
+
+    return {
+      success: true,
+      message: `Role "${trimmedName}" created successfully`,
+      data: newRole
+    };
+  } catch (error: any) {
+    console.error('Create Role Service Error:', error);
+    return errorResponseHandler(
+      error.message || "Failed to create role",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Update role
+export const updateAroleService = async (id: string, payload: any, res: Response) => {
+  try {
+    const { name, description, color, permissions, isActive } = payload;
+
+    const role = await roleModel.findById(id);
+    
+    if (!role) {
+      return errorResponseHandler("Role not found", httpStatusCode.NOT_FOUND, res);
+    }
+
+    // Check if name is taken by another role
+    if (name && name !== role.name) {
+      const existingRole = await roleModel.findOne({ 
+        name: name.trim(),
+        _id: { $ne: id }
+      });
+      
+      if (existingRole) {
+        return errorResponseHandler(
+          "Role with this name already exists",
+          httpStatusCode.BAD_REQUEST,
+          res
+        );
+      }
+      role.name = name.trim();
+    }
+
+    // Update fields
+    if (description !== undefined) role.description = description;
+    if (color) role.color = color;
+    if (permissions) role.permissions = permissions;
+    if (isActive !== undefined) role.isActive = isActive;
+
+    await role.save();
+
+    return {
+      success: true,
+      message: "Role updated successfully",
+      data: role
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to update role",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Delete role (soft delete)
+export const deleteRoleService = async (id: string, res: Response) => {
+  try {
+    const role = await roleModel.findById(id);
+    
+    if (!role) {
+      return errorResponseHandler("Role not found", httpStatusCode.NOT_FOUND, res);
+    }
+
+    // Check if role has users assigned
+    if (role.userCount > 0) {
+      return errorResponseHandler(
+        "Cannot delete role with assigned users",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    // Check if role is default
+    if (role.isDefault) {
+      return errorResponseHandler(
+        "Cannot delete default role",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    // Soft delete
+    role.isActive = false;
+    await role.save();
+
+    return {
+      success: true,
+      message: "Role deleted successfully",
+      data: role
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to delete role",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Initialize default roles
+export const initializeDefaultRolesService = async (  payload: any,
+  res: Response) => {
+  try {
+    let createdCount = 0;
+    let skippedCount = 0;
+
+    for (const defaultRole of defaultRoles) {
+      const existingRole = await roleModel.findOne({ 
+        name: defaultRole.name 
+      });
+
+      if (!existingRole) {
+        const newRole = new roleModel({
+          ...defaultRole,
+          createdBy: "system"
+        });
+        await newRole.save();
+        createdCount++;
+      } else {
+        skippedCount++;
+      }
+    }
+
+    return {
+      success: true,
+      message: `${createdCount} default roles initialized, ${skippedCount} already exist`,
+      data: {
+        created: createdCount,
+        skipped: skippedCount,
+        total: defaultRoles.length
+      }
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to initialize default roles",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Get default roles list
+export const getDefaultRolesListService = async (res: Response) => {
+  try {
+    return {
+      success: true,
+      message: "Default roles retrieved successfully",
+      data: defaultRoles
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to fetch default roles",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
 
 
+// Get all jobs with pagination and filtering
+export const getAllJobsService = async (payload: any) => {
+  try {
+    const page = parseInt(payload.page as string) || 1;
+    const limit = parseInt(payload.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    
+    // Build query
+    const query: any = { isDeleted: false };
+    
+    // Filter by status
+    if (payload.status) {
+      query.status = payload.status;
+    }
+    
+    // Filter by availability
+    if (payload.availability) {
+      query.availability = payload.availability;
+    }
+    
+    // Filter by contract type
+    if (payload.contractType) {
+      query.contractType = payload.contractType;
+    }
+    
+    // Filter by location
+    if (payload.location) {
+      query.locations = { $in: [payload.location] };
+    }
+    
+    // Search by title or notes
+    if (payload.search) {
+      query.$or = [
+        { jobTitle: { $regex: payload.search, $options: "i" } },
+        { notes: { $regex: payload.search, $options: "i" } }
+      ];
+    }
+    
+    // Sort
+    const sort: any = {};
+    const sortField = payload.sortBy || "createdAt";
+    const sortOrder = payload.sortOrder === "asc" ? 1 : -1;
+    sort[sortField] = sortOrder;
+    
+    const totalDataCount = await jobModel.countDocuments(query);
+    const results = await jobModel.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .select("-__v");
+    
+    if (results.length) {
+      return {
+        page,
+        limit,
+        success: true,
+        total: totalDataCount,
+        data: results
+      };
+    } else {
+      return {
+        data: [],
+        page,
+        limit,
+        success: true,
+        total: 0
+      };
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to fetch jobs",
+      data: [],
+      total: 0,
+      page: 1,
+      limit: 10
+    };
+  }
+};
 
+// Get single job by ID with applied candidates
+export const getJobInfoService = async (id: string, res: Response) => {
+  try {
+    const job = await jobModel.findOne({
+      _id: id,
+      isDeleted: false,
+    }).select("-__v");
 
+    if (!job) {
+      return errorResponseHandler(
+        "Job not found",
+        httpStatusCode.NOT_FOUND,
+        res
+      );
+    }
 
+    const applications = await applicationModel.find({
+      jobId: id,
+      isDeleted: false,
+    });
 
+    const applicationsWithCandidates = await Promise.all(
+      applications.map(async (application) => {
+        const candidate = await candidateModel.findById(application.candidateId);
 
+        return {
+          ...application.toObject(),
+          candidate,
+        };
+      })
+    );
 
+    return {
+      success: true,
+      message: "Job retrieved successfully",
+      data: {
+        ...job.toObject(),
+        applications: applicationsWithCandidates,
+      },
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to fetch job",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
 
+// Create job (Draft or Publish)
+export const createJobService = async (payload: any, userId: string, res: Response) => {
+  try {
+    const {
+      jobTitle,
+      availability,
+      experience,
+      contractType,
+      locations,
+      salaryMin,
+      salaryMax,
+      status,
+      startDate,
+      deadline,
+      notes,
+      responsibilities,
+      requirements,
+      benefits,
+      teamMembers,
+      autoShortlistScore,
+      requireResume,
+      requireCoverLetter,
+      requireDrivingLicence,
+      requireDBS,
+      requireReferences
+    } = payload;
 
+    // Validate required fields
+    if (!jobTitle || !availability || !experience || !contractType || 
+        !locations || locations.length === 0 || !salaryMin || !salaryMax || !deadline) {
+      return errorResponseHandler(
+        "Missing required fields. Please fill in all required fields.",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
 
+    // Create new job
+    const newJob = new jobModel({
+      jobTitle: jobTitle.trim(),
+      availability,
+      experience,
+      contractType,
+      locations,
+      salaryMin,
+      salaryMax,
+      status: status || "Draft",
+      startDate: startDate || null,
+      deadline,
+      notes: notes || null,
+      responsibilities: responsibilities || [],
+      requirements: requirements || [],
+      benefits: benefits || [],
+      teamMembers: teamMembers || [],
+      autoShortlistScore: autoShortlistScore || 75,
+      requireResume: requireResume !== undefined ? requireResume : true,
+      requireCoverLetter: requireCoverLetter || false,
+      requireDrivingLicence: requireDrivingLicence || false,
+      requireDBS: requireDBS !== undefined ? requireDBS : true,
+      requireReferences: requireReferences !== undefined ? requireReferences : true,
+      createdBy: userId
+    });
 
+    await newJob.save();
 
+    return {
+      success: true,
+      message: status === "Open" ? "Job published successfully!" : "Draft saved successfully!",
+      data: newJob
+    };
+  } catch (error: any) {
+    console.error("Create job error:", error);
+    return errorResponseHandler(
+      error.message || "Failed to create job",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
 
+// Update job
+export const updateJobService = async (id: string, payload: any, res: Response) => {
+  try {
+    const job = await jobModel.findOne({ _id: id, isDeleted: false });
+    
+    if (!job) {
+      return errorResponseHandler("Job not found", httpStatusCode.NOT_FOUND, res);
+    }
 
+    const {
+      jobTitle,
+      availability,
+      experience,
+      contractType,
+      locations,
+      salaryMin,
+      salaryMax,
+      status,
+      startDate,
+      deadline,
+      notes,
+      responsibilities,
+      requirements,
+      benefits,
+      teamMembers,
+      autoShortlistScore,
+      requireResume,
+      requireCoverLetter,
+      requireDrivingLicence,
+      requireDBS,
+      requireReferences
+    } = payload;
 
+    // Update fields
+    if (jobTitle) job.jobTitle = jobTitle.trim();
+    if (availability) job.availability = availability;
+    if (experience) job.experience = experience;
+    if (contractType) job.contractType = contractType;
+    if (locations) job.locations = locations;
+    if (salaryMin) job.salaryMin = salaryMin;
+    if (salaryMax) job.salaryMax = salaryMax;
+    if (status) job.status = status;
+    if (startDate !== undefined) job.startDate = startDate;
+    if (deadline) job.deadline = deadline;
+    if (notes !== undefined) job.notes = notes;
+    if (responsibilities) job.responsibilities = responsibilities;
+    if (requirements) job.requirements = requirements;
+    if (benefits) job.benefits = benefits;
+    if (teamMembers) job.teamMembers = teamMembers;
+    if (autoShortlistScore !== undefined) job.autoShortlistScore = autoShortlistScore;
+    if (requireResume !== undefined) job.requireResume = requireResume;
+    if (requireCoverLetter !== undefined) job.requireCoverLetter = requireCoverLetter;
+    if (requireDrivingLicence !== undefined) job.requireDrivingLicence = requireDrivingLicence;
+    if (requireDBS !== undefined) job.requireDBS = requireDBS;
+    if (requireReferences !== undefined) job.requireReferences = requireReferences;
 
+    // If status changed to Open, set publishedAt
+    if (status === "Open" && job.status !== "Open") {
+      job.publishedAt = new Date();
+    }
 
+    await job.save();
+
+    return {
+      success: true,
+      message: "Job updated successfully",
+      data: job
+    };
+  } catch (error: any) {
+    console.error("Update job error:", error);
+    return errorResponseHandler(
+      error.message || "Failed to update job",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Delete job (soft delete)
+export const deleteJobService = async (id: string, res: Response) => {
+  try {
+    const job = await jobModel.findOne({ _id: id, isDeleted: false });
+    
+    if (!job) {
+      return errorResponseHandler("Job not found", httpStatusCode.NOT_FOUND, res);
+    }
+
+    // Soft delete
+    job.isDeleted = true;
+    job.status = "Archived";
+    await job.save();
+
+    return {
+      success: true,
+      message: "Job deleted successfully",
+      data: job
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to delete job",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Publish job
+export const publishJobService = async (id: string, res: Response) => {
+  try {
+    const job = await jobModel.findOne({ _id: id, isDeleted: false });
+    
+    if (!job) {
+      return errorResponseHandler("Job not found", httpStatusCode.NOT_FOUND, res);
+    }
+
+    // Check if all required fields are filled
+    const requiredFields = [
+      job.jobTitle,
+      job.availability,
+      job.experience,
+      job.contractType,
+      job.locations && job.locations.length > 0,
+      job.salaryMin,
+      job.salaryMax,
+      job.deadline,
+      job.notes,
+      job.responsibilities && job.responsibilities.length > 0,
+      job.requirements && job.requirements.length > 0,
+      job.teamMembers && job.teamMembers.length > 0
+    ];
+
+    const missingFields = requiredFields.filter(field => !field);
+    
+    if (missingFields.length > 0) {
+      return errorResponseHandler(
+        "Cannot publish job. Please fill in all required fields.",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    job.status = "Open";
+    job.publishedAt = new Date();
+    await job.save();
+
+    return {
+      success: true,
+      message: "Job published successfully!",
+      data: job
+    };
+  } catch (error: any) {
+    return errorResponseHandler(
+      error.message || "Failed to publish job",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
+  }
+};
+
+// Get job statistics
+export const getJobStatsService = async () => {
+  try {
+    const total = await jobModel.countDocuments({ isDeleted: false });
+    const open = await jobModel.countDocuments({ isDeleted: false, status: "Open" });
+    const draft = await jobModel.countDocuments({ isDeleted: false, status: "Draft" });
+    const closed = await jobModel.countDocuments({ isDeleted: false, status: "Closed" });
+    const paused = await jobModel.countDocuments({ isDeleted: false, status: "Paused" });
+
+    return {
+      success: true,
+      data: {
+        total,
+        open,
+        draft,
+        closed,
+        paused
+      }
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to fetch job statistics",
+      data: null
+    };
+  }
+};

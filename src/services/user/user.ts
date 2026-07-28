@@ -2,7 +2,6 @@ import { Request, Response } from "express"
 import { errorResponseHandler } from "../../lib/errors/error-response-handler"
 import { usersModel } from "../../models/user/user-schema"
 import bcrypt from "bcryptjs"
-import { notificationsModel } from "../../models/notifications/notifications-schema";
 import { generatePasswordResetToken, generatePasswordResetTokenByPhone, getPasswordResetTokenByToken } from "../../utils/mails/token"
 import { sendPasswordResetEmail } from "../../utils/mails/mail"
 import { generatePasswordResetTokenByPhoneWithTwilio } from "../../utils/sms/sms"
@@ -10,12 +9,13 @@ import { httpStatusCode } from "../../lib/constant"
 import { customAlphabet } from "nanoid"
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { adminModel } from "src/models/admin/admin-schema";
-import { workshopModel } from "src/models/workshop/workshop-schema";
 
 
 export const signupService = async (payload: any, res: Response) => {
+  const email = payload.email.toLowerCase().trim();
+
   const emailExists = await usersModel.findOne({
-    email: payload.email.toLowerCase().trim()
+    email,
   });
 
   if (emailExists) {
@@ -26,25 +26,24 @@ export const signupService = async (payload: any, res: Response) => {
     );
   }
 
-  payload.password = bcrypt.hashSync(payload.password, 10);
+  // Temporary: Set password as the user's email
+  payload.email = email;
+  payload.password = bcrypt.hashSync(email, 10);
 
-  const identifier = customAlphabet('0123456789', 3);
+  const identifier = customAlphabet("0123456789", 3);
   payload.identifier = identifier();
 
-  const user = await new usersModel({
-    ...payload,
-    email: payload.email.toLowerCase().trim()
-  }).save();
+  const user = await new usersModel(payload).save();
 
   const token = jwt.sign(
     {
       id: user._id,
       email: user.email,
-      phoneNumber: user.phoneNumber
+      phoneNumber: user.phoneNumber,
     },
     process.env.JWT_SECRET as string,
     {
-      expiresIn: '7d'
+      expiresIn: "7d",
     }
   );
 
@@ -52,7 +51,7 @@ export const signupService = async (payload: any, res: Response) => {
     success: true,
     message: "User signup successful",
     token,
-    user
+    user,
   };
 };
 
@@ -392,97 +391,6 @@ export const deleteAUserService = async (id: string, res: Response) => {
   // }
 }
 
-
-
-export const getNotificationPreferencesService = async (payload: any, res: Response) => {
-  const userId = payload.userId;
-  // console.log("userIdpayload", userId);
-  const user = await notificationsModel.findOne({ userId });
-
-  return {
-    success: true,
-    message: "Notification preferences fetched successfully",
-    data: user
-  };
-}
-
-export const updateNotificationPreferencesService = async (
-  payload: any,
-  res: Response
-) => {
-  const { userId, body } = payload;
-
-  const identifier = customAlphabet("0123456789", 3);
-
-  const updatedUser = await notificationsModel.findOneAndUpdate(
-    { userId },
-    {
-      $set: {
-        ...body,
-        userId,
-      },
-      $setOnInsert: {
-        identifier: identifier(), // only when creating
-      },
-    },
-    {
-      new: true,
-      upsert: true, // create if not found
-      runValidators: true,
-    }
-  );
-
-  return {
-    success: true,
-    message: "Notification preferences saved successfully",
-    data: updatedUser,
-  };
-};
-
-
-export const createWorkshopService = async (
-  payload: any,
-  res: Response
-) => {
-  try {
-    const { userId, body } = payload;
-
-    const identifier = customAlphabet("0123456789", 3);
-
-    const workshop = await workshopModel.create({
-      ...body,
-      userId,
-      identifier: identifier(),
-    });
-
-    return {
-      success: true,
-      message: "Workshop created successfully",
-      data: workshop,
-    };
-  } catch (error: any) {
-    console.error("Error creating workshop:", error);
-
-    return {
-      success: false,
-      message: error.message || "Failed to create workshop",
-      data: null,
-    };
-  }
-};
-
-
-export const getworkshopService = async (payload: any, res: Response) => {
-  const userId = payload.userId;
-  // console.log("userIdpayload", userId);
-  const user = await workshopModel.findOne({ userId });
-
-  return {
-    success: true,
-    message: "Workshops fetched successfully",
-    data: user
-  };
-}
 
 // Dashboard
 export const getDashboardStatsService = async (payload: any, res: Response) => {

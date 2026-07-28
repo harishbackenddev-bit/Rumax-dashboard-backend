@@ -4,8 +4,7 @@ import { errorParser } from "../../lib/errors/error-response-handler"
 import { clientSignupSchema, passswordResetSchema } from "../../validation/client-user"
 import { formatZodErrors } from "../../validation/format-zod-errors"
 import { loginService, signupService,userdataServive, forgotPasswordService, verifyPasswordResetService,deleteAUserService,
-     getDashboardStatsService, getUserInfoService, updateAUserService, updateAPasswordService, twoFactorAuthService,
-    getNotificationPreferencesService, updateNotificationPreferencesService, createWorkshopService, getworkshopService
+     getDashboardStatsService, getUserInfoService, updateAUserService, updateAPasswordService, twoFactorAuthService
  } from "../../services/user/user"
 import { z } from "zod"
 import mongoose from "mongoose"
@@ -132,33 +131,6 @@ export const updateAPassword = async (req: Request, res: Response) => {
 
 
 
-
-
-
-export const getNotificationPreferences = async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).currentUser;
-        const response = await getNotificationPreferencesService({ userId }, res)
-        return res.status(httpStatusCode.OK).json(response)
-    } catch (error: any) {
-        const { code, message } = errorParser(error)
-        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-    }
-}
-
-
-
-export const updateNotificationPreferences = async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).currentUser;
-        const response = await updateNotificationPreferencesService({ userId, body: req.body }, res)
-        return res.status(httpStatusCode.OK).json(response)
-    } catch (error: any) {
-        const { code, message } = errorParser(error)
-        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-    }
-}
-
 export const profileupdate = async (req: Request, res: Response) => {
   try {
     // Check if file was uploaded
@@ -193,29 +165,6 @@ export const profileupdate = async (req: Request, res: Response) => {
     });
   }
 };
-
-
-export const createWorkshop = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).currentUser;
-    const response = await createWorkshopService({userId,body: req.body,},res);
-    return res.status(httpStatusCode.OK).json(response);
-  } catch (error: any) {
-    const { code, message } = errorParser(error);
-    return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({success: false,message: message || "An error occurred",});
-  }
-};
-
-export const getworkshop = async (req: Request, res: Response) => {
-    try {
-        const userId = (req as any).currentUser;
-        const response = await getworkshopService({ userId }, res)
-        return res.status(httpStatusCode.OK).json(response)
-    } catch (error: any) {
-        const { code, message } = errorParser(error)
-        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" })
-    }
-}
 
 // Dashboard
 export const getDashboardStats = async (req: Request, res: Response) => {
