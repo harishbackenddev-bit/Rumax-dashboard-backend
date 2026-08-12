@@ -47,7 +47,7 @@ const documentStorage = multer.diskStorage({
 });
 
 const documentFileFilter = (req: any, file: any, cb: any) => {
-  const allowedTypes = /pdf|doc|docx|jpg|jpeg|png|txt/;
+const allowedTypes = /pdf|doc|docx|jpg|jpeg|png|txt|mp4|webm|mov|avi|mkv/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
 

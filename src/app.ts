@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
-import { admin, user } from "./routes/index.js";
+import { admin, user, website } from "./routes/index.js";
 // import { checkValidAdminRole } from "./utils/index.js";
 import bodyParser from "body-parser";
 import { login } from "./controllers/admin/admin.js";
@@ -27,7 +27,8 @@ const corsOptions = {
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
     "http://localhost:5174",
-    "https://rumax-dashboard-frontend.vercel.app"
+    "https://rumax-dashboard-frontend.vercel.app",
+    "https://rumax-second-main-website.vercel.app"
   ],
   methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
   credentials: true,
@@ -69,7 +70,7 @@ app.use("/api/login", login);
 app.use("/api/forgot-password", forgotPassword);
 app.use("/api/reset-password", verifyPasswordReset);
 app.use("/api", user);
-
+app.use("/api/website", website);
 
 // ✅ Error handling middleware (optional but recommended)
 app.use((err: any, req: any, res: any, next: any) => {
