@@ -71,6 +71,17 @@ export interface IScenarioAnswers {
   q3: string;
 }
 
+// Status history entry
+export interface IStatusHistory {
+  status: string;
+  jobId?: string;
+  jobTitle?: string;
+  changedAt: Date;
+  changedBy?: string;
+  notes?: string;
+  reason?: string;
+}
+
 export interface ICandidate extends Document {
   // Step 1: Personal Information
   firstName: string;
@@ -116,6 +127,41 @@ export interface ICandidate extends Document {
   supportingStatement: string;
   scenarioAnswers: IScenarioAnswers;
   coreValues: string[];
+  
+  // ============================================
+  // STATUS & APPLICATION TRACKING
+  // ============================================
+  status: string;
+  statusHistory: IStatusHistory[];
+  appliedDate: Date;
+  applicationSource: string;
+  
+  // Rejection details
+  rejectionReason: string;
+  rejectionNotes: string;
+  rejectedAt: Date | null;
+  
+  // Interview details
+  interviewDate: string;
+  interviewTime: string;
+  interviewer: string;
+  interviewFormat: string;
+  interviewScheduledAt: Date | null;
+  
+  // Offer & Hiring
+  offerSentAt: Date | null;
+  hiredAt: Date | null;
+  
+  // Current job context
+  currentJobId: string;
+  currentJobTitle: string;
+  
+  // ============================================
+  // DOCUMENT REQUEST FIELDS (NEW)
+  // ============================================
+  requestedDocuments: string[];
+  documentRequestNote: string;
+  documentRequestedAt: Date | null;
   
   // Metadata
   resumeUrl: string;
@@ -207,6 +253,17 @@ const scenarioAnswersSchema = new Schema<IScenarioAnswers>({
   q3: { type: String, required: true }
 });
 
+// Status History Schema
+const statusHistorySchema = new Schema<IStatusHistory>({
+  status: { type: String, required: true },
+  jobId: { type: String, default: '' },
+  jobTitle: { type: String, default: '' },
+  changedAt: { type: Date, default: Date.now },
+  changedBy: { type: String, default: '' },
+  notes: { type: String, default: '' },
+  reason: { type: String, default: '' }
+});
+
 // Main Candidate Schema
 const candidateSchema = new Schema<ICandidate>(
   {
@@ -267,6 +324,45 @@ const candidateSchema = new Schema<ICandidate>(
     scenarioAnswers: { type: scenarioAnswersSchema, required: true },
     coreValues: { type: [String], default: ['Compassion', 'Respect', 'Integrity', 'Continuous Learning', 'Excellence'] },
 
+    // ============================================
+    // STATUS & APPLICATION TRACKING
+    // ============================================
+    status: { 
+      type: String, 
+      required: true,
+      default: 'Pending'
+    },
+    statusHistory: { type: [statusHistorySchema], default: [] },
+    appliedDate: { type: Date, default: Date.now },
+    applicationSource: { type: String, default: 'Website' },
+    
+    // Rejection details
+    rejectionReason: { type: String, default: '' },
+    rejectionNotes: { type: String, default: '' },
+    rejectedAt: { type: Date, default: null },
+    
+    // Interview details
+    interviewDate: { type: String, default: '' },
+    interviewTime: { type: String, default: '' },
+    interviewer: { type: String, default: '' },
+    interviewFormat: { type: String, default: 'Video Call (Teams)' },
+    interviewScheduledAt: { type: Date, default: null },
+    
+    // Offer & Hiring
+    offerSentAt: { type: Date, default: null },
+    hiredAt: { type: Date, default: null },
+    
+    // Current job context
+    currentJobId: { type: String, default: '' },
+    currentJobTitle: { type: String, default: '' },
+
+    // ============================================
+    // DOCUMENT REQUEST FIELDS
+    // ============================================
+    requestedDocuments: { type: [String], default: [] },
+    documentRequestNote: { type: String, default: '' },
+    documentRequestedAt: { type: Date, default: null },
+
     // Metadata
     resumeUrl: { type: String, default: '' },
     coverLetterUrl: { type: String, default: '' },
@@ -296,9 +392,25 @@ candidateSchema.virtual('fullAddress').get(function() {
   return parts.join(', ');
 });
 
+// Pre-save hook - Update status history
+candidateSchema.pre('save', function(next) {
+  if (this.isModified('status')) {
+    this.statusHistory.push({
+      status: this.status,
+      jobId: this.currentJobId || '',
+      jobTitle: this.currentJobTitle || '',
+      changedAt: new Date(),
+      notes: `Status changed to ${this.status}`
+    });
+  }
+  next();
+});
+
 // Indexes
 candidateSchema.index({ email: 1 });
 candidateSchema.index({ isDeleted: 1 });
+candidateSchema.index({ status: 1 });
+candidateSchema.index({ appliedDate: -1 });
 candidateSchema.index({ firstName: 'text', lastName: 'text', email: 'text' });
 
 export const candidateModel = model<ICandidate>("candidates", candidateSchema);

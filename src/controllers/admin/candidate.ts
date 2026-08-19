@@ -8,7 +8,9 @@ import {
   deleteCandidateService,
   updateCandidateStatusService,
   getCandidateStatsService,
-  applyForJobService
+  applyForJobService,
+  updateCandidateService,
+  getAllstandbyCandidatesService
 } from "../../services/admin/candidate-service";
 
 // Get all candidates
@@ -24,6 +26,23 @@ export const getAllCandidates = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getAllstandbyCandidates = async (req: Request, res: Response) => {
+  try {
+    const response = await getAllstandbyCandidatesService(req.query);
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: message || "An error occurred"
+    });
+  }
+};
+
+
+
+
 
 // Get candidate by ID
 export const getCandidate = async (req: Request, res: Response) => {
@@ -77,24 +96,28 @@ export const applyForJob = async (req: Request, res: Response) => {
   }
 };
 
+
+
+
+
 // // Update candidate
-// export const updateCandidate = async (req: Request, res: Response) => {
-//   try {
-//     const response = await updateCandidateService(req.params.id, req.body, res);
+export const updateCandidate = async (req: Request, res: Response) => {
+  try {
+    const response = await updateCandidateService(req.params.id, req.body, res);
 
-//     if (response && !response.success) {
-//       return res.status(httpStatusCode.BAD_REQUEST).json(response);
-//     }
+    if (response && !response.success) {
+      return res.status(httpStatusCode.BAD_REQUEST).json(response);
+    }
 
-//     return res.status(httpStatusCode.OK).json(response);
-//   } catch (error: any) {
-//     const { code, message } = errorParser(error);
-//     return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({
-//       success: false,
-//       message: message || "An error occurred"
-//     });
-//   }
-// };
+    return res.status(httpStatusCode.OK).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: message || "An error occurred"
+    });
+  }
+};
 
 // Delete candidate
 export const deleteCandidate = async (req: Request, res: Response) => {

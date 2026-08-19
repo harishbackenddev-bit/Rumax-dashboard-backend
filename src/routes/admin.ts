@@ -22,10 +22,11 @@ import {
   getAllCandidates,
   getCandidate,
   createCandidate,
-  // updateCandidate,
+  updateCandidate,
   deleteCandidate,
   getCandidateStats,
-  applyForJob
+  applyForJob,
+  getAllstandbyCandidates
 } from "../controllers/admin/candidate";
 
 import { upload } from "../config/multer";
@@ -60,5 +61,9 @@ router.post("/candidates/apply", checkAuth, applyForJob); // Apply for job
 router.get("/candidate/:id", getCandidate);
 // router.put("/candidate/:id", updateCandidate);
 router.delete("/candidate/:id", deleteCandidate);
+
+router.patch("/candidate/:id/status", updateCandidate);
+
+router.get("/candidates/standby", getAllstandbyCandidates);
 
 export { router }
