@@ -22,6 +22,8 @@ export const uploadCandidatePhotoService = async (
         });
 
         if (!candidate) {
+            // Delete uploaded file if candidate not found
+            deleteFile(file.path);
             return errorResponseHandler(
                 "Candidate not found",
                 httpStatusCode.NOT_FOUND,
@@ -29,16 +31,19 @@ export const uploadCandidatePhotoService = async (
             );
         }
 
-        // If existing photo exists, delete it
+        // If existing photo exists, delete it from public/upload/profile
         if (candidate.photoUrl) {
-            const oldPhotoPath = path.join(__dirname, "../../uploads/candidates", candidate.photoUrl);
+            const oldPhotoPath = path.join(process.cwd(), "public/upload/profile", path.basename(candidate.photoUrl));
             if (fs.existsSync(oldPhotoPath)) {
-                fs.unlinkSync(oldPhotoPath);
+                deleteFile(oldPhotoPath);
             }
         }
 
-        // Save the photo URL (assuming uploads are stored in /uploads/candidates/)
-        const photoUrl = `/uploads/candidates/${file.filename}`;
+        // Generate the public URL for the uploaded photo
+        // The URL will be: /upload/profile/filename
+        const photoUrl = `/upload/profile/${file.filename}`;
+        
+        // Update candidate with photo URL
         candidate.photoUrl = photoUrl;
         await candidate.save();
 
@@ -47,11 +52,16 @@ export const uploadCandidatePhotoService = async (
             message: "Photo uploaded successfully",
             data: {
                 photoUrl: photoUrl,
-                candidateId: candidate._id
+                candidateId: candidate._id,
+                fileName: file.filename
             }
         };
     } catch (error: any) {
         console.error("Upload photo error:", error);
+        // Delete uploaded file if error occurs
+        if (file && file.path) {
+            deleteFile(file.path);
+        }
         return errorResponseHandler(
             error.message || "Failed to upload photo",
             httpStatusCode.INTERNAL_SERVER_ERROR,
@@ -60,6 +70,58 @@ export const uploadCandidatePhotoService = async (
     }
 };
 
+// ============================================
+// DELETE PHOTO SERVICE - NEW
+// ============================================
+
+export const deleteCandidatePhotoService = async (candidateId: string, res: Response) => {
+    try {
+        const candidate = await candidateModel.findOne({
+            _id: candidateId,
+            isDeleted: false
+        });
+
+        if (!candidate) {
+            return errorResponseHandler(
+                "Candidate not found",
+                httpStatusCode.NOT_FOUND,
+                res
+            );
+        }
+
+        if (!candidate.photoUrl) {
+            return errorResponseHandler(
+                "No photo to delete",
+                httpStatusCode.BAD_REQUEST,
+                res
+            );
+        }
+
+        // Delete the file from public/upload/profile
+        const photoPath = path.join(process.cwd(), "public/upload/profile", path.basename(candidate.photoUrl));
+        if (fs.existsSync(photoPath)) {
+            deleteFile(photoPath);
+        }
+
+        candidate.photoUrl = null;
+        await candidate.save();
+
+        return {
+            success: true,
+            message: "Photo deleted successfully",
+            data: {
+                candidateId: candidate._id
+            }
+        };
+    } catch (error: any) {
+        console.error("Delete photo error:", error);
+        return errorResponseHandler(
+            error.message || "Failed to delete photo",
+            httpStatusCode.INTERNAL_SERVER_ERROR,
+            res
+        );
+    }
+};
 // Get all candidates with pagination and filtering
 export const getAllCandidatesService = async (payload: any) => {
   try {
@@ -222,7 +284,8 @@ export const getAllstandbyCandidatesService = async (payload: any) => {
       appliedDate: candidate.appliedDate ? new Date(candidate.appliedDate).toISOString().split('T')[0] : null,
       createdAt: candidate.createdAt ? new Date(candidate.createdAt).toISOString().split('T')[0] : null,
       updatedAt: candidate.updatedAt ? new Date(candidate.updatedAt).toISOString().split('T')[0] : null,
-      resumeUrl: candidate.resumeUrl
+      resumeUrl: candidate.resumeUrl,
+      photoUrl: candidate.photoUrl,
     }));
 
     return {
