@@ -15,7 +15,7 @@ export const deleteFile = (filePath: string) => {
 };
 
 // Ensure upload directory exists - using public/uploads/profile
-const uploadDir = path.join(process.cwd(), "public/uploads/profile");
+const uploadDir = path.join(process.cwd(), "public/uploads/profiles");
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
