@@ -26,7 +26,8 @@ import {
   deleteCandidate,
   getCandidateStats,
   applyForJob,
-  getAllstandbyCandidates
+  getAllstandbyCandidates,
+  uploadCandidatePhoto  
 } from "../controllers/admin/candidate";
 
 import { upload } from "../config/multer";
@@ -61,7 +62,11 @@ router.post("/candidates/apply", checkAuth, applyForJob); // Apply for job
 router.get("/candidate/:id", getCandidate);
 // router.put("/candidate/:id", updateCandidate);
 router.delete("/candidate/:id", deleteCandidate);
-
+router.post(
+    "/candidate/:id/photo",
+    upload.single('photo'), // Use multer for file upload
+    uploadCandidatePhoto
+);
 router.patch("/candidate/:id/status", updateCandidate);
 
 router.get("/candidates/standby", getAllstandbyCandidates);
