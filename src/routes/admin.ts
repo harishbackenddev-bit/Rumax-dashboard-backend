@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { upload, handleMulterError } from "../config/multer";
 import {
     getDashboardStats,updateProfile, updateAPassword, 
       getRoles,getAllUsers, getUserInfo, updateAUser, deleteAUser, createUser,
@@ -66,11 +67,20 @@ router.delete("/candidate/:id", deleteCandidate);
 router.post(
     "/candidate/:id/photo",
     checkAuth,
-    upload.single('photo'),
+    (req, res, next) => {
+        // Use multer with error handling
+        upload.single('photo')(req, res, (err) => {
+            if (err) {
+                const error = handleMulterError(err);
+                return res.status(400).json(error);
+            }
+            next();
+        });
+    },
     uploadCandidatePhoto
 );
 
-// Optional: Delete photo route
+// Delete photo route
 router.delete(
     "/candidate/:id/photo",
     checkAuth,
