@@ -5,7 +5,60 @@ import { candidateModel, ICandidate } from "../../models/candidate/candidate-sch
 import jwt from 'jsonwebtoken';
 import { applicationModel } from "../../models/job/application-schema";
 import { sendStatusUpdateEmail, sendDocumentRequestEmail } from "../../utils/email-service";
+import path from "path";
+import fs from "fs";
 
+
+export const uploadCandidatePhotoService = async (
+    candidateId: string,
+    file: Express.Multer.File,
+    res: Response
+) => {
+    try {
+        // Find the candidate
+        const candidate = await candidateModel.findOne({
+            _id: candidateId,
+            isDeleted: false
+        });
+
+        if (!candidate) {
+            return errorResponseHandler(
+                "Candidate not found",
+                httpStatusCode.NOT_FOUND,
+                res
+            );
+        }
+
+        // If existing photo exists, delete it
+        if (candidate.photoUrl) {
+            const oldPhotoPath = path.join(__dirname, "../../uploads/candidates", candidate.photoUrl);
+            if (fs.existsSync(oldPhotoPath)) {
+                fs.unlinkSync(oldPhotoPath);
+            }
+        }
+
+        // Save the photo URL (assuming uploads are stored in /uploads/candidates/)
+        const photoUrl = `/uploads/candidates/${file.filename}`;
+        candidate.photoUrl = photoUrl;
+        await candidate.save();
+
+        return {
+            success: true,
+            message: "Photo uploaded successfully",
+            data: {
+                photoUrl: photoUrl,
+                candidateId: candidate._id
+            }
+        };
+    } catch (error: any) {
+        console.error("Upload photo error:", error);
+        return errorResponseHandler(
+            error.message || "Failed to upload photo",
+            httpStatusCode.INTERNAL_SERVER_ERROR,
+            res
+        );
+    }
+};
 
 // Get all candidates with pagination and filtering
 export const getAllCandidatesService = async (payload: any) => {
