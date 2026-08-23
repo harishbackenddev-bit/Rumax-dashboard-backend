@@ -11,7 +11,8 @@ import {
   applyForJobService,
   updateCandidateService,
   getAllstandbyCandidatesService,
-  uploadCandidatePhotoService
+  uploadCandidatePhotoService,
+  deleteCandidatePhotoService,
 } from "../../services/admin/candidate-service";
 // Get all candidates
 export const getAllCandidates = async (req: Request, res: Response) => {
@@ -55,6 +56,30 @@ export const uploadCandidatePhoto = async (req: Request, res: Response) => {
         }
 
         const response = await uploadCandidatePhotoService(candidateId, file, res);
+        
+        if (response && !response.success) {
+            return res.status(httpStatusCode.BAD_REQUEST).json(response);
+        }
+        
+        return res.status(httpStatusCode.OK).json(response);
+    } catch (error: any) {
+        const { code, message } = errorParser(error);
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: message || "An error occurred"
+        });
+    }
+};
+
+export const deleteCandidatePhoto = async (req: Request, res: Response) => {
+    try {
+        const candidateId = req.params.id;
+        const response = await deleteCandidatePhotoService(candidateId, res);
+        
+        if (response && !response.success) {
+            return res.status(httpStatusCode.BAD_REQUEST).json(response);
+        }
+        
         return res.status(httpStatusCode.OK).json(response);
     } catch (error: any) {
         const { code, message } = errorParser(error);
