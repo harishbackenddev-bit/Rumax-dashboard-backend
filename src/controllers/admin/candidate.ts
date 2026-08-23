@@ -48,25 +48,44 @@ export const uploadCandidatePhoto = async (req: Request, res: Response) => {
         const candidateId = req.params.id;
         const file = req.file;
         
+        // Check if file exists
         if (!file) {
             return res.status(httpStatusCode.BAD_REQUEST).json({
                 success: false,
-                message: "No photo file uploaded"
+                message: "No photo file uploaded. Please select an image file."
             });
         }
 
+        // Log the uploaded file info for debugging
+        console.log('File uploaded:', {
+            filename: file.filename,
+            path: file.path,
+            size: file.size,
+            mimetype: file.mimetype
+        });
+
         const response = await uploadCandidatePhotoService(candidateId, file, res);
         
-        if (response && !response.success) {
+        // Check if response has error
+        if (response && response.success === false) {
+            // Delete uploaded file if service failed
+            if (file.path && fs.existsSync(file.path)) {
+                deleteFile(file.path);
+            }
             return res.status(httpStatusCode.BAD_REQUEST).json(response);
         }
         
         return res.status(httpStatusCode.OK).json(response);
     } catch (error: any) {
+        console.error('Upload photo controller error:', error);
+        // Delete uploaded file if error occurred
+        if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+            deleteFile(req.file.path);
+        }
         const { code, message } = errorParser(error);
         return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: message || "An error occurred"
+            message: message || "An error occurred while uploading photo"
         });
     }
 };
