@@ -52,7 +52,7 @@ export const uploadCandidatePhotoService = async (
 
         // If existing photo exists, delete it from public/upload/profile
         if (candidate.photoUrl) {
-            const oldPhotoPath = path.join(process.cwd(), "public/upload/profile", path.basename(candidate.photoUrl));
+            const oldPhotoPath = path.join(process.cwd(), "public/uploads/profiles", path.basename(candidate.photoUrl));
             if (fs.existsSync(oldPhotoPath)) {
                 deleteFile(oldPhotoPath);
                 console.log('Deleted old photo:', oldPhotoPath);
@@ -60,7 +60,7 @@ export const uploadCandidatePhotoService = async (
         }
 
         // Generate the public URL for the uploaded photo
-        const photoUrl = `/upload/profile/${file.filename}`;
+        const photoUrl = `/uploads/profiles/${file.filename}`;
         
         // Update candidate with photo URL
         candidate.photoUrl = photoUrl;
@@ -121,7 +121,7 @@ export const deleteCandidatePhotoService = async (candidateId: string, res: Resp
         }
 
         // Delete the file from public/upload/profile
-        const photoPath = path.join(process.cwd(), "public/upload/profile", path.basename(candidate.photoUrl));
+        const photoPath = path.join(process.cwd(), "public/uploads/profiles", path.basename(candidate.photoUrl));
         if (fs.existsSync(photoPath)) {
             deleteFile(photoPath);
             console.log('Deleted photo file:', photoPath);
