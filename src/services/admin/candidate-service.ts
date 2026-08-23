@@ -5,6 +5,7 @@ import { candidateModel, ICandidate } from "../../models/candidate/candidate-sch
 import jwt from 'jsonwebtoken';
 import { applicationModel } from "../../models/job/application-schema";
 import { sendStatusUpdateEmail, sendDocumentRequestEmail } from "../../utils/email-service";
+import { deleteFile } from "../../config/multer";
 import path from "path";
 import fs from "fs";
 
@@ -15,6 +16,22 @@ export const uploadCandidatePhotoService = async (
     res: Response
 ) => {
     try {
+        console.log('Uploading photo for candidate:', candidateId);
+        console.log('File info:', file);
+
+        // Validate candidate ID
+        if (!candidateId || candidateId === 'undefined' || candidateId === 'null') {
+            // Delete uploaded file
+            if (file.path) {
+                deleteFile(file.path);
+            }
+            return errorResponseHandler(
+                "Invalid candidate ID",
+                httpStatusCode.BAD_REQUEST,
+                res
+            );
+        }
+
         // Find the candidate
         const candidate = await candidateModel.findOne({
             _id: candidateId,
@@ -23,7 +40,9 @@ export const uploadCandidatePhotoService = async (
 
         if (!candidate) {
             // Delete uploaded file if candidate not found
-            deleteFile(file.path);
+            if (file.path) {
+                deleteFile(file.path);
+            }
             return errorResponseHandler(
                 "Candidate not found",
                 httpStatusCode.NOT_FOUND,
@@ -33,19 +52,21 @@ export const uploadCandidatePhotoService = async (
 
         // If existing photo exists, delete it from public/upload/profile
         if (candidate.photoUrl) {
-            const oldPhotoPath = path.join(process.cwd(), "public/uploads/profiles", path.basename(candidate.photoUrl));
+            const oldPhotoPath = path.join(process.cwd(), "public/upload/profile", path.basename(candidate.photoUrl));
             if (fs.existsSync(oldPhotoPath)) {
                 deleteFile(oldPhotoPath);
+                console.log('Deleted old photo:', oldPhotoPath);
             }
         }
 
         // Generate the public URL for the uploaded photo
-        // The URL will be: /upload/profile/filename
-        const photoUrl = `/uploads/profiles/${file.filename}`;
+        const photoUrl = `/upload/profile/${file.filename}`;
         
         // Update candidate with photo URL
         candidate.photoUrl = photoUrl;
         await candidate.save();
+
+        console.log('Photo uploaded successfully for candidate:', candidateId);
 
         return {
             success: true,
@@ -57,7 +78,7 @@ export const uploadCandidatePhotoService = async (
             }
         };
     } catch (error: any) {
-        console.error("Upload photo error:", error);
+        console.error("Upload photo service error:", error);
         // Delete uploaded file if error occurs
         if (file && file.path) {
             deleteFile(file.path);
@@ -71,11 +92,13 @@ export const uploadCandidatePhotoService = async (
 };
 
 // ============================================
-// DELETE PHOTO SERVICE - NEW
+// DELETE PHOTO SERVICE - Fixed
 // ============================================
 
 export const deleteCandidatePhotoService = async (candidateId: string, res: Response) => {
     try {
+        console.log('Deleting photo for candidate:', candidateId);
+
         const candidate = await candidateModel.findOne({
             _id: candidateId,
             isDeleted: false
@@ -98,9 +121,10 @@ export const deleteCandidatePhotoService = async (candidateId: string, res: Resp
         }
 
         // Delete the file from public/upload/profile
-        const photoPath = path.join(process.cwd(), "public/uploads/profiles", path.basename(candidate.photoUrl));
+        const photoPath = path.join(process.cwd(), "public/upload/profile", path.basename(candidate.photoUrl));
         if (fs.existsSync(photoPath)) {
             deleteFile(photoPath);
+            console.log('Deleted photo file:', photoPath);
         }
 
         candidate.photoUrl = null;
