@@ -279,6 +279,11 @@ const candidateSchema = new Schema<ICandidate>(
     county: { type: String, required: true, trim: true },
     postcode: { type: String, required: true, trim: true },
     nationality: { type: String, required: true, trim: true },
+     photoUrl: { 
+            type: String, 
+            default: null,
+            description: "URL to candidate profile photo stored in public/upload/profile"
+        },
     rightToWork: { 
       type: String, 
       required: true,
