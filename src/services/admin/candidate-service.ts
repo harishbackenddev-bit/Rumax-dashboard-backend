@@ -155,36 +155,86 @@ export const getAllCandidatesService = async (payload: any) => {
 
     const query: any = { isDeleted: false };
 
+    // Filter by status
     if (payload.status) query.status = payload.status;
-    if (payload.role) query.role = { $regex: payload.role, $options: "i" };
-    if (payload.location) query.location = { $regex: payload.location, $options: "i" };
-    if (payload.availability) query.availability = payload.availability;
+    
+    // Filter by job ID
+    if (payload.jobId) query.jobId = payload.jobId;
+    
+    // Filter by candidate ID
+    if (payload.candidateId) query.candidateId = payload.candidateId;
 
+    // Search across candidate name, email, job title
     if (payload.search) {
       query.$or = [
-        { name: { $regex: payload.search, $options: "i" } },
-        { email: { $regex: payload.search, $options: "i" } },
-        { role: { $regex: payload.search, $options: "i" } }
+        { jobTitle: { $regex: payload.search, $options: "i" } },
+        { 'candidateDetails.firstName': { $regex: payload.search, $options: "i" } },
+        { 'candidateDetails.lastName': { $regex: payload.search, $options: "i" } },
+        { 'candidateDetails.email': { $regex: payload.search, $options: "i" } }
       ];
     }
 
     const sort: any = {};
-    const sortField = payload.sortBy || "appliedDate";
+    const sortField = payload.sortBy || "applicationDate";
     const sortOrder = payload.sortOrder === "asc" ? 1 : -1;
     sort[sortField] = sortOrder;
 
-    const totalDataCount = await candidateModel.countDocuments(query);
-    const results = await candidateModel.find(query)
+    // Populate candidate details
+    const results = await applicationModel.find(query)
+      .populate('candidateId', 'firstName lastName email phone addressLine1 city postcode nationality rightToWork')
+      .populate('jobId', 'jobTitle location department status')
       .sort(sort)
       .skip(skip)
       .limit(limit)
       .select("-__v");
 
-    const formattedResults = results.map(candidate => ({
-      ...candidate.toObject(),
-      appliedDate: candidate.appliedDate ? new Date(candidate.appliedDate).toISOString().split('T')[0] : null,
-      createdAt: candidate.createdAt ? new Date(candidate.createdAt).toISOString().split('T')[0] : null
-    }));
+    const totalDataCount = await applicationModel.countDocuments(query);
+
+    const formattedResults = results.map(application => {
+      const appObj = application.toObject();
+      const candidate = appObj.candidateId || {};
+      
+      return {
+        _id: appObj._id,
+        applicationId: appObj._id,
+        candidateId: appObj.candidateId?._id || appObj.candidateId,
+        jobId: appObj.jobId?._id || appObj.jobId,
+        jobTitle: appObj.jobId?.jobTitle || appObj.jobTitle || 'N/A',
+        jobDetails: appObj.jobId || null,
+        
+        // Candidate information
+        firstName: candidate.firstName || '',
+        lastName: candidate.lastName || '',
+        fullName: `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Unknown',
+        email: candidate.email || '',
+        phone: candidate.phone || '',
+        address: candidate.addressLine1 || '',
+        city: candidate.city || '',
+        postcode: candidate.postcode || '',
+        nationality: candidate.nationality || '',
+        rightToWork: candidate.rightToWork || '',
+        
+        // Application details
+        status: appObj.status || 'Pending',
+        score: appObj.score || 0,
+        applicationDate: appObj.applicationDate || appObj.createdAt,
+        coverLetter: appObj.coverLetter || '',
+        additionalNotes: appObj.additionalNotes || '',
+        availableFrom: appObj.availableFrom || '',
+        expectedSalary: appObj.expectedSalary || '',
+        noticePeriod: appObj.noticePeriod || '',
+        interviewDate: appObj.interviewDate || null,
+        interviewNotes: appObj.interviewNotes || '',
+        interviewers: appObj.interviewers || [],
+        offerDetails: appObj.offerDetails || {},
+        rejectionReason: appObj.rejectionReason || '',
+        rejectionNotes: appObj.rejectionNotes || '',
+        jobSnapshot: appObj.jobSnapshot || {},
+        
+        createdAt: appObj.createdAt,
+        updatedAt: appObj.updatedAt
+      };
+    });
 
     return {
       page,
@@ -194,9 +244,10 @@ export const getAllCandidatesService = async (payload: any) => {
       data: formattedResults
     };
   } catch (error: any) {
+    console.error('Error fetching applications:', error);
     return {
       success: false,
-      message: error.message || "Failed to fetch candidates",
+      message: error.message || "Failed to fetch applications",
       data: [],
       total: 0,
       page: 1,
@@ -208,7 +259,7 @@ export const getAllCandidatesService = async (payload: any) => {
 export const getAllstandbyCandidatesService = async (payload: any) => {
   try {
 
-    console.log("payload", payload)
+    // console.log("payload", payload)
     const page = parseInt(payload.page as string) || 1;
     const limit = parseInt(payload.limit as string) || 12;
     const skip = (page - 1) * limit;
@@ -633,8 +684,11 @@ export const updateCandidateService = async (
   res: Response
 ) => {
   try {
-    // Find candidate
-    const candidate = await candidateModel.findOne({
+    // ============================================
+    // FIND APPLICATION / CANDIDATE
+    // ============================================
+
+    const candidate = await applicationModel.findOne({
       _id: id,
       isDeleted: false
     });
@@ -642,10 +696,41 @@ export const updateCandidateService = async (
     if (!candidate) {
       return {
         success: false,
-        message: "Candidate not found",
+        message: "Candidate application not found",
         statusCode: httpStatusCode.NOT_FOUND
       };
     }
+
+
+    // ============================================
+    // FIND MAIN CANDIDATE RECORD
+    // ============================================
+
+    if (!candidate.candidateId) {
+      return {
+        success: false,
+        message: "Candidate ID is missing from application",
+        statusCode: httpStatusCode.NOT_FOUND
+      };
+    }
+
+    const candidatemain = await candidateModel.findOne({
+      _id: candidate.candidateId,
+      isDeleted: false
+    });
+
+    if (!candidatemain) {
+      return {
+        success: false,
+        message: "Main candidate record not found",
+        statusCode: httpStatusCode.NOT_FOUND
+      };
+    }
+
+
+    // ============================================
+    // GET PAYLOAD
+    // ============================================
 
     const {
       status,
@@ -663,20 +748,25 @@ export const updateCandidateService = async (
       standbyStatus
     } = payload;
 
-    // Validate status
+
+    // ============================================
+    // VALID STATUSES
+    // ============================================
+
     const validStatuses = [
-      'Pending',
-      'In Review',
-      'Interview Scheduled',
-      'Offer Sent',
-      'Hired',
-      'Rejected',
-      'Standby',
-      'Document Requested',
-      'Deployed',
-      'Unavailable',
-      'Available'
+      "Pending",
+      "In Review",
+      "Interview Scheduled",
+      "Offer Sent",
+      "Hired",
+      "Rejected",
+      "Standby",
+      "Document Requested",
+      "Deployed",
+      "Unavailable",
+      "Available"
     ];
+
 
     if (!status || !validStatuses.includes(status)) {
       return {
@@ -686,153 +776,436 @@ export const updateCandidateService = async (
       };
     }
 
-    // Store old status for email
-    const oldStatus = candidate.status || 'Pending';
 
     // ============================================
-    // UPDATE STATUS
+    // OLD STATUS
     // ============================================
+
+    const oldStatus = candidate.status || "Pending";
+
+
+    // ============================================
+    // UPDATE APPLICATION STATUS
+    // ============================================
+
     candidate.status = status;
 
-    // Update current job info
-    if (jobId) {
+
+    // ============================================
+    // CURRENT JOB INFORMATION
+    // ============================================
+
+    if (jobId !== undefined && jobId !== null) {
       candidate.currentJobId = jobId;
     }
-    if (jobTitle) {
+
+    if (jobTitle !== undefined && jobTitle !== null) {
       candidate.currentJobTitle = jobTitle;
     }
 
+
     // ============================================
-    // STATUS-SPECIFIC UPDATES
+    // STATUS SPECIFIC UPDATES
     // ============================================
+
     switch (status) {
-      case 'Rejected':
-        candidate.rejectionReason = rejectionReason || '';
-        candidate.rejectionNotes = rejectionNotes || '';
+
+      case "Rejected":
+
+        candidate.rejectionReason =
+          rejectionReason || "";
+
+        candidate.rejectionNotes =
+          rejectionNotes || "";
+
         candidate.rejectedAt = new Date();
+
         break;
 
-      case 'Interview Scheduled':
-        candidate.interviewDate = interviewDate || '';
-        candidate.interviewTime = interviewTime || '';
-        candidate.interviewer = interviewer || '';
-        candidate.interviewFormat = interviewFormat || 'Video Call (Teams)';
-        candidate.interviewScheduledAt = new Date();
+
+      case "Interview Scheduled":
+
+        candidate.interviewDate =
+          interviewDate || "";
+
+        candidate.interviewTime =
+          interviewTime || "";
+
+        candidate.interviewer =
+          interviewer || "";
+
+        candidate.interviewFormat =
+          interviewFormat || "Video Call (Teams)";
+
+        candidate.interviewScheduledAt =
+          new Date();
+
         break;
 
-      case 'Offer Sent':
-        candidate.offerSentAt = new Date();
+
+      case "Offer Sent":
+
+        candidate.offerSentAt =
+          new Date();
+
         break;
 
-      case 'Hired':
-        candidate.hiredAt = new Date();
+
+      case "Hired":
+
+        candidate.hiredAt =
+          new Date();
+
         break;
 
-      case 'Document Requested':
-        candidate.requestedDocuments = requestedDocuments || documents || [];
-        candidate.documentRequestNote = documentNote || '';
-        candidate.documentRequestedAt = new Date();
+
+      case "Document Requested":
+
+        candidate.requestedDocuments =
+          requestedDocuments ||
+          documents ||
+          [];
+
+        candidate.documentRequestNote =
+          documentNote || "";
+
+        candidate.documentRequestedAt =
+          new Date();
+
         break;
 
-      case 'Deployed':
-      case 'Unavailable':
-      case 'Available':
-        // Just update the standby status - no additional fields needed
-        if (status === 'Deployed' || status === 'Unavailable' || status === 'Available') {
-          // Update standbyStatus as well for consistency
-          candidate.status = status;
-        }
+
+      case "Deployed":
+      case "Unavailable":
+      case "Available":
+
+        candidate.status = status;
+
+        candidatemain.status = status;
+
+        break;
+
+
+      case "Standby":
+
+        candidate.status = "Standby";
+
+        candidatemain.status = "Standby";
+
+        break;
+
+
+      case "Pending":
+      case "In Review":
+
+        candidate.status = status;
+
+        candidatemain.status = status;
+
         break;
     }
 
-    // Save candidate
+
+    // ============================================
+    // SAVE APPLICATION
+    // ============================================
+
     await candidate.save();
 
-    // ============================================
-    // DETERMINE IF EMAIL SHOULD BE SENT
-    // ============================================
-    // No email for these statuses (just save and return)
-    const noEmailStatuses = ['Deployed', 'Unavailable', 'Available'];
-    const shouldSendEmail = !noEmailStatuses.includes(status);
 
     // ============================================
-    // SEND EMAIL NOTIFICATION (ONLY FOR SPECIFIC STATUSES)
+    // UPDATE MAIN CANDIDATE
     // ============================================
+
+    candidatemain.status = status;
+
+    await candidatemain.save();
+
+
+    // ============================================
+    // EMAIL SETTINGS
+    // ============================================
+
+    const noEmailStatuses = [
+      "Deployed",
+      "Unavailable",
+      "Available"
+    ];
+
+    const shouldSendEmail =
+      !noEmailStatuses.includes(status);
+
+
+    let emailSent = false;
+    let documentEmailSent = false;
+
+
+    // ============================================
+    // SEND STATUS EMAIL
+    // ============================================
+
     if (shouldSendEmail) {
-      // Send status update email
-      const emailData = {
-        candidateEmail: candidate.email,
-        candidateName: candidate.firstName,
-        status: status,
-        jobTitle: jobTitle || candidate.currentJobTitle || 'position',
-        oldStatus: oldStatus,
-        rejectionReason: rejectionReason || null,
-        interviewDetails: status === 'Interview Scheduled' ? {
-          date: interviewDate || '',
-          time: interviewTime || '',
-          interviewer: interviewer || '',
-          format: interviewFormat || 'Video Call (Teams)'
-        } : null
-      };
 
-      try {
-        await sendStatusUpdateEmail(emailData);
-        console.log(`Status update email sent to ${candidate.email} for status: ${status}`);
-      } catch (emailError) {
-        console.error("Status update email failed:", emailError);
-      }
+      const candidateEmail =
+        candidate.email ||
+        candidatemain.email;
 
-      // ============================================
-      // IF DOCUMENT REQUESTED - SEND DOCUMENT REQUEST EMAIL
-      // ============================================
-      if (status === 'Document Requested' && (requestedDocuments || documents)) {
-        const docRequestData = {
-          candidateEmail: candidate.email,
-          candidateName: candidate.firstName,
-          documents: requestedDocuments || documents || [],
-          note: documentNote || '',
-          jobTitle: jobTitle || candidate.currentJobTitle || 'position'
+
+      const candidateName =
+        candidate.firstName ||
+        candidatemain.firstName ||
+        "";
+
+
+      const currentJobTitle =
+        jobTitle ||
+        candidate.currentJobTitle ||
+        candidatemain.positionAppliedFor ||
+        "position";
+
+
+      // --------------------------------------------
+      // IMPORTANT:
+      // Make sure recipient exists
+      // --------------------------------------------
+
+      if (!candidateEmail) {
+
+        console.error(
+          "Status email not sent: Candidate email not found",
+          {
+            applicationId: candidate._id,
+            candidateId: candidate.candidateId
+          }
+        );
+
+      } else {
+
+        const emailData = {
+
+          // IMPORTANT
+          candidateEmail: candidateEmail,
+
+          candidateName: candidateName,
+
+          status: status,
+
+          jobTitle: currentJobTitle,
+
+          oldStatus: oldStatus,
+
+          rejectionReason:
+            rejectionReason ||
+            candidate.rejectionReason ||
+            null,
+
+          interviewDetails:
+            status === "Interview Scheduled"
+              ? {
+                  date:
+                    interviewDate ||
+                    candidate.interviewDate ||
+                    "",
+
+                  time:
+                    interviewTime ||
+                    candidate.interviewTime ||
+                    "",
+
+                  interviewer:
+                    interviewer ||
+                    candidate.interviewer ||
+                    "",
+
+                  format:
+                    interviewFormat ||
+                    candidate.interviewFormat ||
+                    "Video Call (Teams)"
+                }
+              : null
         };
 
+
         try {
-          await sendDocumentRequestEmail(docRequestData);
-          console.log(`Document request email sent to ${candidate.email}`);
-        } catch (docEmailError) {
-          console.error("Document request email failed:", docEmailError);
+
+          await sendStatusUpdateEmail(
+            emailData
+          );
+
+          emailSent = true;
+
+          console.log(
+            `Status update email sent to ${candidateEmail} for status: ${status}`
+          );
+
+        } catch (emailError) {
+
+          console.error(
+            "Status update email failed:",
+            emailError
+          );
+
         }
+
+
+        // ========================================
+        // DOCUMENT REQUEST EMAIL
+        // ========================================
+
+        if (
+          status === "Document Requested" &&
+          (
+            requestedDocuments ||
+            documents ||
+            candidate.requestedDocuments?.length
+          )
+        ) {
+
+          const documentList =
+            requestedDocuments ||
+            documents ||
+            candidate.requestedDocuments ||
+            [];
+
+
+          const docRequestData = {
+
+            candidateEmail:
+              candidateEmail,
+
+            candidateName:
+              candidateName,
+
+            documents:
+              documentList,
+
+            note:
+              documentNote ||
+              candidate.documentRequestNote ||
+              "",
+
+            jobTitle:
+              currentJobTitle
+          };
+
+
+          try {
+
+            await sendDocumentRequestEmail(
+              docRequestData
+            );
+
+            documentEmailSent = true;
+
+            console.log(
+              `Document request email sent to ${candidateEmail}`
+            );
+
+          } catch (docEmailError) {
+
+            console.error(
+              "Document request email failed:",
+              docEmailError
+            );
+
+          }
+
+        }
+
       }
+
     } else {
-      console.log(`No email sent for status: ${status} (candidate: ${candidate.email})`);
+
+      console.log(
+        `No email sent for status: ${status} (candidate: ${candidate.email})`
+      );
+
     }
+
 
     // ============================================
     // RETURN RESPONSE
     // ============================================
+
     return {
+
       success: true,
-      message: `Candidate status updated to "${status}" successfully`,
-      statusCode: httpStatusCode.OK,
+
+      message:
+        `Candidate status updated to "${status}" successfully`,
+
+      statusCode:
+        httpStatusCode.OK,
+
       data: {
-        id: candidate._id,
-        firstName: candidate.firstName,
-        lastName: candidate.lastName,
-        email: candidate.email,
-        status: candidate.status,
-        oldStatus: oldStatus,
-        currentJobTitle: candidate.currentJobTitle,
-        standbyStatus: candidate.status,
-        updatedAt: candidate.updatedAt,
-        emailSent: shouldSendEmail
+
+        id:
+          candidate._id,
+
+        candidateId:
+          candidate.candidateId,
+
+        firstName:
+          candidate.firstName ||
+          candidatemain.firstName,
+
+        lastName:
+          candidate.lastName ||
+          candidatemain.lastName,
+
+        email:
+          candidate.email ||
+          candidatemain.email,
+
+        status:
+          candidate.status,
+
+        oldStatus:
+          oldStatus,
+
+        currentJobId:
+          candidate.currentJobId,
+
+        currentJobTitle:
+          candidate.currentJobTitle,
+
+        standbyStatus:
+          candidate.status,
+
+        updatedAt:
+          candidate.updatedAt,
+
+        emailSent:
+          emailSent,
+
+        documentEmailSent:
+          documentEmailSent
+
       }
+
     };
 
+
   } catch (error: any) {
-    console.error("Update candidate status error:", error);
+
+    console.error(
+      "Update candidate status error:",
+      error
+    );
+
     return {
+
       success: false,
-      message: error.message || "Failed to update candidate status",
-      statusCode: httpStatusCode.INTERNAL_SERVER_ERROR
+
+      message:
+        error.message ||
+        "Failed to update candidate status",
+
+      statusCode:
+        httpStatusCode.INTERNAL_SERVER_ERROR
+
     };
+
   }
 };
 

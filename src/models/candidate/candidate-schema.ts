@@ -96,6 +96,7 @@ export interface ICandidate extends Document {
   postcode: string;
   nationality: string;
   rightToWork: string;
+  photoUrl: string;
   
   // Step 2: Role & Availability (Preferences)
   positionAppliedFor: string;
@@ -128,47 +129,11 @@ export interface ICandidate extends Document {
   scenarioAnswers: IScenarioAnswers;
   coreValues: string[];
   
-  // ============================================
-  // STATUS & APPLICATION TRACKING
-  // ============================================
-  status: string;
-  statusHistory: IStatusHistory[];
-  appliedDate: Date;
-  applicationSource: string;
-  
-  // Rejection details
-  rejectionReason: string;
-  rejectionNotes: string;
-  rejectedAt: Date | null;
-  
-  // Interview details
-  interviewDate: string;
-  interviewTime: string;
-  interviewer: string;
-  interviewFormat: string;
-  interviewScheduledAt: Date | null;
-  
-  // Offer & Hiring
-  offerSentAt: Date | null;
-  hiredAt: Date | null;
-  
-  // Current job context
-  currentJobId: string;
-  currentJobTitle: string;
-  
-  // ============================================
-  // DOCUMENT REQUEST FIELDS (NEW)
-  // ============================================
-  requestedDocuments: string[];
-  documentRequestNote: string;
-  documentRequestedAt: Date | null;
-  
   // Metadata
   resumeUrl: string;
   coverLetterUrl: string;
   coverLetter: string;
   notes: string;
-  score: number;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
