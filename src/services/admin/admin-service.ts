@@ -865,28 +865,28 @@ export const getJobInfoService = async (id: string, res: Response) => {
       );
     }
 
-    const applications = await applicationModel.find({
-      jobId: id,
-      isDeleted: false,
-    });
+    // const applications = await applicationModel.find({
+    //   jobId: id,
+    //   isDeleted: false,
+    // });
 
-    const applicationsWithCandidates = await Promise.all(
-      applications.map(async (application) => {
-        const candidate = await candidateModel.findById(application.candidateId);
+    // const applicationsWithCandidates = await Promise.all(
+    //   applications.map(async (application) => {
+    //     const candidate = await candidateModel.findById(application.candidateId);
 
-        return {
-          ...application.toObject(),
-          candidate,
-        };
-      })
-    );
+    //     return {
+    //       ...application.toObject(),
+    //       candidate,
+    //     };
+    //   })
+    // );
 
     return {
       success: true,
       message: "Job retrieved successfully",
       data: {
         ...job.toObject(),
-        applications: applicationsWithCandidates,
+        // applications: applicationsWithCandidates,
       },
     };
   } catch (error: any) {
