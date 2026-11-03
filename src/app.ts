@@ -28,7 +28,8 @@ const corsOptions = {
     "http://127.0.0.1:3000",
     "http://localhost:5174",
     "https://rumax-dashboard-frontend.vercel.app",
-    "https://rumax-second-main-website.vercel.app"
+    "https://rumax-second-main-website.vercel.app",
+    "https://rumax-growth-hub.vercel.app"
   ],
   methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
   credentials: true,
