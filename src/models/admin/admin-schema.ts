@@ -1,4 +1,4 @@
-// models/admin.ts or wherever your schema is defined
+
 import mongoose from "mongoose"
 
 const adminSchema = new mongoose.Schema({

@@ -16,7 +16,7 @@ import {
   deleteRole,
   initializeDefaultRoles,
   getDefaultRolesList,
-  
+  Support
 } from "../controllers/admin/admin";
 
 import {
@@ -89,5 +89,7 @@ router.delete(
 router.patch("/candidate/:id/status", updateCandidate);
 
 router.get("/candidates/standby", getAllstandbyCandidates);
+
+router.post("/support/tickets", checkAuth, Support);
 
 export { router }

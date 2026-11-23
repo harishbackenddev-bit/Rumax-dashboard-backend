@@ -168,3 +168,96 @@ export const sendLatestUpdatesEmail = async (
     throw new Error('Failed to send update email');
   }
 };
+
+
+// ===== Add this to your mail.ts (below sendLatestUpdatesEmail) =====
+
+const escapeHtml = (value: any): string =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+export const sendSupportTicketMailToSupport = async (payload: {
+  ticketId: string;
+  category: string;
+  priority: string;
+  subject: string;
+  message: string;
+  submitterName: string;
+  submitterEmail: string;
+  pageUrl?: string | null;
+  userAgent?: string | null;
+  screenSize?: string | null;
+  language?: string | null;
+}) => {
+  try {
+    const priorityColors: Record<string, string> = {
+      Low: "#6c757d",
+      Medium: "#2563eb",
+      High: "#d97706",
+      Urgent: "#dc2626",
+    };
+    const priorityColor = priorityColors[payload.priority] || "#2563eb";
+    const categoryLabel =
+      payload.category === "website-update" ? "Website update request" : "IT issue";
+
+    // remove line breaks from subject to prevent email header injection
+    const safeSubject = String(payload.subject).replace(/[\r\n]+/g, " ").trim();
+
+    const row = (label: string, value: string) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ddd; width: 150px;"><strong>${label}</strong></td>
+        <td style="padding: 8px; border: 1px solid #ddd; word-break: break-all;">${value}</td>
+      </tr>`;
+
+    const info = await transporter.sendMail({
+      from: process.env.COMPANY_EMAIL || process.env.SMTP_USER,
+      to: process.env.SUPPORT_EMAIL || "support@blnkc.com",
+      replyTo: payload.submitterEmail,
+      subject: `[Support ${payload.ticketId}] [${payload.priority}] ${safeSubject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #601b80; margin-bottom: 4px;">New Support Request</h2>
+          <p style="margin-top: 0; color: #6c757d;">
+            Ticket <strong>${escapeHtml(payload.ticketId)}</strong>
+            &nbsp;|&nbsp;
+            <span style="color: ${priorityColor}; font-weight: bold;">${escapeHtml(payload.priority)} priority</span>
+          </p>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+            ${row("Type", escapeHtml(categoryLabel))}
+            ${row("Subject", escapeHtml(safeSubject))}
+            ${row("Submitted by", escapeHtml(payload.submitterName))}
+            ${row(
+              "Email",
+              `<a href="mailto:${escapeHtml(payload.submitterEmail)}">${escapeHtml(payload.submitterEmail)}</a>`
+            )}
+            ${row("Message", escapeHtml(payload.message).replace(/\n/g, "<br>"))}
+          </table>
+
+          <h3 style="color: #2c3e50; margin-top: 24px;">Technical details</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            ${row("Page", escapeHtml(payload.pageUrl || "N/A"))}
+            ${row("Browser", escapeHtml(payload.userAgent || "N/A"))}
+            ${row("Screen size", escapeHtml(payload.screenSize || "N/A"))}
+            ${row("Language", escapeHtml(payload.language || "N/A"))}
+          </table>
+
+          <p style="margin-top: 20px; color: #6c757d;">
+            <small>Reply to this email to respond directly to ${escapeHtml(payload.submitterName)}.<br>
+            Sent on ${new Date().toLocaleString()}</small>
+          </p>
+        </div>
+      `,
+    });
+
+    console.log("Support ticket email sent:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Error sending support ticket email:", error);
+    throw new Error("Failed to send support ticket email");
+  }
+};

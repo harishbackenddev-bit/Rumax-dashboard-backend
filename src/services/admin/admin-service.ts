@@ -15,6 +15,14 @@ import { defaultRoles, IDefaultRole } from "../../utils/defaultRoles";
 import { jobModel, IJob } from "../../models/job/job-schema";
 import { applicationModel } from "../../models/job/application-schema";
 import { candidateModel } from "../../models/candidate/candidate-schema";
+import { supportModel } from "../../models/support/support";
+import { sendSupportTicketMailToSupport } from "src/utils/mails/mail"; 
+
+
+
+const CATEGORIES = ["it-issue", "website-update"];
+const PRIORITIES = ["Low", "Medium", "High", "Urgent"];
+
 
 export const loginService = async (payload: any, res: Response) => {
     const { username, password } = payload;
@@ -1162,5 +1170,115 @@ export const getJobStatsService = async () => {
       message: error.message || "Failed to fetch job statistics",
       data: null
     };
+  }
+};
+
+
+export const SupportService = async (payload: any, userId: string, res: Response) => {
+  try {
+    const {
+      category,
+      priority,
+      subject,
+      message,
+      pageUrl,
+      userAgent,
+      screenSize,
+      language
+    } = payload;
+
+    // Validate required fields
+    if (!subject || !message) {
+      return errorResponseHandler(
+        "Missing required fields. Please enter a subject and message.",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    if (subject.trim().length < 5 || subject.trim().length > 120) {
+      return errorResponseHandler(
+        "Subject must be between 5 and 120 characters.",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    if (message.trim().length < 15 || message.trim().length > 2000) {
+      return errorResponseHandler(
+        "Message must be between 15 and 2000 characters.",
+        httpStatusCode.BAD_REQUEST,
+        res
+      );
+    }
+
+    if (category && !CATEGORIES.includes(category)) {
+      return errorResponseHandler("Invalid request type.", httpStatusCode.BAD_REQUEST, res);
+    }
+
+    if (priority && !PRIORITIES.includes(priority)) {
+      return errorResponseHandler("Invalid priority.", httpStatusCode.BAD_REQUEST, res);
+    }
+
+    // Get submitter details from logged in admin
+    const admin = await adminModel.findById(userId).select("name email");
+    if (!admin) {
+      return errorResponseHandler("User not found.", httpStatusCode.NOT_FOUND, res);
+    }
+
+    // Create new ticket
+    const newTicket = new supportModel({
+      category: category || "it-issue",
+      priority: priority || "Medium",
+      subject: subject.trim(),
+      message: message.trim(),
+      status: "Open",
+      submittedBy: userId,
+      submitterName: admin.name,
+      submitterEmail: admin.email,
+      pageUrl: pageUrl || null,
+      userAgent: userAgent || null,
+      screenSize: screenSize || null,
+      language: language || null
+    });
+
+    await newTicket.save();
+
+    // Notify support team by email.
+    // If the email fails, the ticket is still saved and the user still gets success.
+    try {
+      await sendSupportTicketMailToSupport({
+        ticketId: newTicket.ticketId as string,
+        category: newTicket.category as string,
+        priority: newTicket.priority as string,
+        subject: newTicket.subject,
+        message: newTicket.message,
+        submitterName: admin.name,
+        submitterEmail: admin.email,
+        pageUrl: newTicket.pageUrl,
+        userAgent: newTicket.userAgent,
+        screenSize: newTicket.screenSize,
+        language: newTicket.language
+      });
+    } catch (mailError) {
+      console.error("Support ticket saved but email failed:", mailError);
+    }
+
+    return {
+      success: true,
+      message: "Your request has been sent to support.",
+      data: {
+        _id: newTicket._id,
+        ticketId: newTicket.ticketId,
+        status: newTicket.status
+      }
+    };
+  } catch (error: any) {
+    console.error("Create support ticket error:", error);
+    return errorResponseHandler(
+      error.message || "Failed to submit support request",
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      res
+    );
   }
 };

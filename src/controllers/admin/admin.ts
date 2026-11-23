@@ -17,7 +17,8 @@ import {
   updateJobService,
   deleteJobService,
   publishJobService,
-  getJobStatsService
+  getJobStatsService,
+  SupportService
 } from "../../services/admin/admin-service";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
@@ -309,6 +310,37 @@ export const createJob = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+
+export const Support = async (req: Request, res: Response) => {
+  try {
+   const userId = (req as any).currentUser;
+    
+    if (!userId) {
+      return res.status(httpStatusCode.UNAUTHORIZED).json({
+        success: false,
+        message: "User not authenticated"
+      });
+    }
+
+    const response = await SupportService(req.body, userId, res);
+    
+    if (response && !response.success) {
+      return res.status(httpStatusCode.BAD_REQUEST).json(response);
+    }
+    
+    return res.status(httpStatusCode.CREATED).json(response);
+  } catch (error: any) {
+    const { code, message } = errorParser(error);
+    return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: message || "An error occurred"
+    });
+  }
+};
+
+
 
 // Update job
 export const updateJob = async (req: Request, res: Response) => {
