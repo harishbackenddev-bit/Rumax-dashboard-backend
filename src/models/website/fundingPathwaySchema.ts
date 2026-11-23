@@ -1,9 +1,9 @@
-// models/website/fundingPathwaySchema.ts
+
 import { Schema, model } from "mongoose";
 
 const FundingPathwaySchema = new Schema(
   {
-    // Step 1 - Care Needs Assessment
+    
     age: {
       type: String,
       required: true,
@@ -24,7 +24,7 @@ const FundingPathwaySchema = new Schema(
       default: false,
     },
     
-    // Step 2 - Funding Eligibility
+    
     assets: {
       type: String,
       required: true,
@@ -40,7 +40,7 @@ const FundingPathwaySchema = new Schema(
       default: false,
     },
     
-    // Step 3 - Contact Details
+    
     fullName: {
       type: String,
       required: true,
@@ -63,7 +63,7 @@ const FundingPathwaySchema = new Schema(
       trim: true,
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Funding Pathway Assessment",
@@ -91,7 +91,7 @@ const FundingPathwaySchema = new Schema(
   }
 );
 
-// Add indexes
+
 FundingPathwaySchema.index({ email: 1 });
 FundingPathwaySchema.index({ phone: 1 });
 FundingPathwaySchema.index({ status: 1 });

@@ -1,9 +1,9 @@
-// models/website/feasibilitySchema.ts
+
 import { Schema, model } from "mongoose";
 
 const FeasibilitySchema = new Schema(
   {
-    // Step 1
+    
     whoAreYou: {
       type: String,
       enum: ["Sponsor", "CRO", "Investigator Site", "NHS Trust", "Other"],
@@ -42,7 +42,7 @@ const FeasibilitySchema = new Schema(
       default: [],
     },
 
-    // Step 2
+    
     studyPhase: {
       type: String,
       enum: ["Phase I", "Phase II", "Phase III", "Phase IV", "Phase V"],
@@ -85,7 +85,7 @@ const FeasibilitySchema = new Schema(
       default: null,
     },
 
-    // System fields
+    
     formName: {
       type: String,
       default: "Trial Feasibility Assessment",
@@ -121,7 +121,7 @@ const FeasibilitySchema = new Schema(
   }
 );
 
-// Indexes
+
 FeasibilitySchema.index({ workEmail: 1 });
 FeasibilitySchema.index({ createdAt: -1 });
 

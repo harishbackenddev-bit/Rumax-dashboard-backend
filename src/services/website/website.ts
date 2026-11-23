@@ -1,4 +1,4 @@
-// services/website/investigatorGuideService.ts
+
 import { Response } from "express";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
@@ -34,14 +34,14 @@ interface CallbackFormData {
 }
 
 interface FeasibilityFormData {
-  // Step 1
+  
   whoAreYou: string;
   fullName: string;
   workEmail: string;
   companyName: string;
   phoneNumber: string;
   areasOfInterest: string[];
-  // Step 2
+  
   studyPhase: string;
   patientEnrollment: string;
   trialDuration: number;
@@ -66,7 +66,7 @@ interface TrialSupportFormData {
   country: string;
 }
 
-// ✅ Save Investigator Site Guide Form
+
 export const saveInvestigatorGuideService = async (
   payload: GuideFormData,
   req: any,
@@ -75,7 +75,7 @@ export const saveInvestigatorGuideService = async (
   try {
     const { fullName, workEmail, organisation } = payload;
 
-    // Validate
+    
     if (!fullName || !workEmail || !organisation) {
       return errorResponseHandler(
         "All fields are required",
@@ -84,7 +84,7 @@ export const saveInvestigatorGuideService = async (
       );
     }
 
-    // Check if email already exists
+    
     const existing = await investigatorGuideModel.findOne({
       workEmail: workEmail.toLowerCase(),
     });
@@ -97,11 +97,11 @@ export const saveInvestigatorGuideService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new investigatorGuideModel({
       fullName,
       workEmail: workEmail.toLowerCase(),
@@ -137,7 +137,7 @@ export const saveInvestigatorGuideService = async (
   }
 };
 
-// ✅ Save Callback Request
+
 export const saveCallbackService = async (
   payload: CallbackFormData,
   req: any,
@@ -154,7 +154,7 @@ export const saveCallbackService = async (
       message,
     } = payload;
 
-    // Validate
+    
     if (!fullName || !phoneNumber || !workEmail || !organisation) {
       return errorResponseHandler(
         "All fields are required",
@@ -163,11 +163,11 @@ export const saveCallbackService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new callbackModel({
       fullName,
       phoneNumber,
@@ -230,7 +230,7 @@ export const saveFeasibilityService = async (
       additionalComments,
     } = payload;
 
-    // Validate
+    
     if (!whoAreYou || !fullName || !workEmail || !companyName || !phoneNumber) {
       return errorResponseHandler(
         "All Step 1 fields are required",
@@ -247,11 +247,11 @@ export const saveFeasibilityService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new feasibilityModel({
       whoAreYou,
       fullName,
@@ -298,7 +298,7 @@ export const saveFeasibilityService = async (
   }
 };
 
-// ✅ Save Trial Support Form
+
 export const saveTrialSupportService = async (
   payload: TrialSupportFormData,
   req: any,
@@ -320,7 +320,7 @@ export const saveTrialSupportService = async (
       country,
     } = payload;
 
-    // Validate
+    
     if (!fullName || !email || !designation || !phoneNumber || !preferredDate || !preferredTime) {
       return errorResponseHandler(
         "All required fields must be filled",
@@ -337,11 +337,11 @@ export const saveTrialSupportService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new trialSupportModel({
       studyPhase: studyPhase || [],
       therapeuticArea: therapeuticArea || [],
@@ -410,7 +410,7 @@ export const saveDomiciliaryAssessmentService = async (
       formName,
     } = payload;
 
-    // Validate required fields
+    
     if (
       !firstName ||
       !lastName ||
@@ -431,7 +431,7 @@ export const saveDomiciliaryAssessmentService = async (
       );
     }
 
-    // Validate email
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -440,7 +440,7 @@ export const saveDomiciliaryAssessmentService = async (
       );
     }
 
-    // Validate phone number (10-15 digits)
+    
     const phoneRegex = /^[\d\s\-+()]{10,15}$/;
     if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -450,11 +450,11 @@ export const saveDomiciliaryAssessmentService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new domiciliaryAssessmentModel({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -507,7 +507,7 @@ export const saveTrainingBookingService = async (
 ) => {
   try {
     const {
-      // Step 1 - Personal & Contact
+      
       fullLegalName,
       preferredName,
       dateOfBirth,
@@ -517,7 +517,7 @@ export const saveTrainingBookingService = async (
       phoneNumber,
       nationalInsurance,
       
-      // Step 2 - Emergency Contacts
+      
       contactPhone,
       alternativeEmail,
       emergencyContactName,
@@ -525,13 +525,13 @@ export const saveTrainingBookingService = async (
       relationshipToLearner,
       preferredContactMethod,
       
-      // Step 3 - Eligibility & Vetting
+      
       rightToWorkStatus,
       dbsStatus,
       photoIdAvailable,
       proofOfAddress,
       
-      // Step 4 - Experience & Qualifications
+      
       trainingCourseRequired,
       currentRole,
       previousCareExperience,
@@ -539,25 +539,25 @@ export const saveTrainingBookingService = async (
       preferredTrainingDate,
       trainingLocationPreference,
       
-      // Step 5 - Health & Accessibility
+      
       healthCondition,
       accessibilityRequirements,
       learningSupportNeeds,
       canAttendPractical,
       additionalNotes,
       
-      // Step 6 - Declarations & Consents
+      
       fullName,
       phoneNumberConfirmation,
       consentConfirmation,
       signatureName,
       
-      // System fields
+      
       source,
       formName,
     } = payload;
 
-    // Validate required fields
+    
     if (
       !fullLegalName ||
       !dateOfBirth ||
@@ -586,7 +586,7 @@ export const saveTrainingBookingService = async (
       );
     }
 
-    // Validate email
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -595,7 +595,7 @@ export const saveTrainingBookingService = async (
       );
     }
 
-    // Validate phone number (10-15 digits)
+    
     const phoneRegex = /^[\d\s\-+()]{10,15}$/;
     if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -605,7 +605,7 @@ export const saveTrainingBookingService = async (
       );
     }
 
-    // Validate National Insurance number format (basic)
+    
     const niRegex = /^[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\d{6}[A-D]$/i;
     if (!niRegex.test(nationalInsurance.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -615,13 +615,13 @@ export const saveTrainingBookingService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new trainingBookingModel({
-      // Step 1 - Personal & Contact
+      
       fullLegalName: fullLegalName.trim(),
       preferredName: preferredName ? preferredName.trim() : null,
       dateOfBirth,
@@ -631,7 +631,7 @@ export const saveTrainingBookingService = async (
       phoneNumber: phoneNumber.trim(),
       nationalInsurance: nationalInsurance.trim().toUpperCase(),
       
-      // Step 2 - Emergency Contacts
+      
       contactPhone: contactPhone.trim(),
       alternativeEmail: alternativeEmail ? alternativeEmail.toLowerCase().trim() : null,
       emergencyContactName: emergencyContactName.trim(),
@@ -639,13 +639,13 @@ export const saveTrainingBookingService = async (
       relationshipToLearner: relationshipToLearner ? relationshipToLearner.trim() : null,
       preferredContactMethod: preferredContactMethod ? preferredContactMethod.trim() : null,
       
-      // Step 3 - Eligibility & Vetting
+      
       rightToWorkStatus: rightToWorkStatus.trim(),
       dbsStatus: dbsStatus.trim(),
       photoIdAvailable: photoIdAvailable.trim(),
       proofOfAddress: proofOfAddress.trim(),
       
-      // Step 4 - Experience & Qualifications
+      
       trainingCourseRequired: trainingCourseRequired.trim(),
       currentRole: currentRole ? currentRole.trim() : null,
       previousCareExperience: previousCareExperience ? previousCareExperience.trim() : null,
@@ -653,20 +653,20 @@ export const saveTrainingBookingService = async (
       preferredTrainingDate: preferredTrainingDate ? preferredTrainingDate.trim() : null,
       trainingLocationPreference: trainingLocationPreference ? trainingLocationPreference.trim() : null,
       
-      // Step 5 - Health & Accessibility
+      
       healthCondition: healthCondition ? healthCondition.trim() : null,
       accessibilityRequirements: accessibilityRequirements ? accessibilityRequirements.trim() : null,
       learningSupportNeeds: learningSupportNeeds ? learningSupportNeeds.trim() : null,
       canAttendPractical: canAttendPractical ? canAttendPractical.trim() : null,
       additionalNotes: additionalNotes ? additionalNotes.trim() : null,
       
-      // Step 6 - Declarations & Consents
+      
       fullName: fullName.trim(),
       phoneNumberConfirmation: phoneNumberConfirmation.trim(),
       consentConfirmation: consentConfirmation.trim(),
       signatureName: signatureName.trim(),
       
-      // System fields
+      
       ipAddress,
       userAgent,
       formName: formName || "Training Service Booking",
@@ -725,7 +725,7 @@ export const saveFeedbackService = async (
       formName,
     } = payload;
 
-    // Validate required fields
+    
     if (
       !firstName ||
       !lastName ||
@@ -744,7 +744,7 @@ export const saveFeedbackService = async (
       );
     }
 
-    // Validate email
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -753,7 +753,7 @@ export const saveFeedbackService = async (
       );
     }
 
-    // Validate phone number (10-15 digits)
+    
     const phoneRegex = /^[\d\s\-+()]{10,15}$/;
     if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -763,7 +763,7 @@ export const saveFeedbackService = async (
       );
     }
 
-    // Validate urgency
+    
     if (!["low", "medium", "high"].includes(urgency)) {
       return errorResponseHandler(
         "Invalid urgency level",
@@ -772,7 +772,7 @@ export const saveFeedbackService = async (
       );
     }
 
-    // Validate mood
+    
     if (!["happy", "neutral", "worried", "frustrated", "upset"].includes(mood)) {
       return errorResponseHandler(
         "Invalid mood selection",
@@ -781,7 +781,7 @@ export const saveFeedbackService = async (
       );
     }
 
-    // Validate feedback method
+    
     if (!["write", "voice", "video"].includes(feedbackMethod)) {
       return errorResponseHandler(
         "Invalid feedback method",
@@ -790,11 +790,11 @@ export const saveFeedbackService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new feedbackModel({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -876,7 +876,7 @@ export const saveEnquiryService = async (
       formName,
     } = payload;
 
-    // Validate required fields
+    
     if (!enquiryType || !fullName || !email ) {
       return errorResponseHandler(
         "All required fields must be filled",
@@ -885,7 +885,7 @@ export const saveEnquiryService = async (
       );
     }
 
-    // Validate enquiry type
+    
     if (!["care", "research"].includes(enquiryType)) {
       return errorResponseHandler(
         "Invalid enquiry type",
@@ -894,7 +894,7 @@ export const saveEnquiryService = async (
       );
     }
 
-    // Validate email
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -903,7 +903,7 @@ export const saveEnquiryService = async (
       );
     }
 
-// Validate phone number only if provided
+
 if (phoneNumber && phoneNumber.trim() !== "") {
   const phoneRegex = /^[\d\s\-+()]{10,15}$/;
 
@@ -916,11 +916,11 @@ if (phoneNumber && phoneNumber.trim() !== "") {
   }
 }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new enquiryModel({
       enquiryType,
       fullName: fullName.trim(),
@@ -928,21 +928,21 @@ if (phoneNumber && phoneNumber.trim() !== "") {
       phoneNumber: phoneNumber.trim(),
       additionalInfo: additionalInfo ? additionalInfo.trim() : null,
       
-      // Care fields
+      
       relationshipToClient: relationshipToClient || null,
       postcode: postcode || null,
       careType: careType || null,
       timeframe: timeframe || null,
       fundingType: fundingType || null,
       
-      // Research fields
+      
       organization: organization || null,
       jobTitle: jobTitle || null,
       regions: regions || null,
       supportRequired: supportRequired || null,
       timeline: timeline || null,
       
-      // System fields
+      
       ipAddress,
       userAgent,
       formName: formName || "Enquiry Form",
@@ -987,7 +987,7 @@ export const saveReferralService = async (
 ) => {
   try {
     const {
-      // Client Details
+      
       firstName,
       lastName,
       clientFullName,
@@ -996,42 +996,42 @@ export const saveReferralService = async (
       phoneNumber,
       email,
       
-      // Referrer Details
+      
       organization,
       jobTitle,
       
-      // Referral Details
+      
       primaryReason,
       briefSummary,
       urgencyLevel,
       estimatedDischargeDate,
       additionalInfo,
       
-      // File Uploads
+      
       uploadedFile,
       uploadedFileName,
       uploadedFileUrl,
       
-      // Consents
+      
       consentData,
       consentReferral,
       
-      // System fields
+      
       source,
       formName,
       
-      // Dynamic fields
+      
       ...dynamicFields
     } = payload;
 
-    // Determine which fields are available
+    
     const fullName = clientFullName || `${firstName || ''} ${lastName || ''}`.trim() || null;
     const referrerName = `${firstName || ''} ${lastName || ''}`.trim() || null;
     const referrerOrganization = organization || null;
     const referrerJobTitle = jobTitle || null;
     const referralReason = briefSummary || primaryReason || null;
 
-    // Validate required fields
+    
     if (!fullName && !clientFullName) {
       return errorResponseHandler(
         "Client full name is required",
@@ -1072,7 +1072,7 @@ export const saveReferralService = async (
       );
     }
 
-    // Validate urgency level
+    
     if (urgencyLevel && !["standard", "urgent"].includes(urgencyLevel)) {
       return errorResponseHandler(
         "Invalid urgency level",
@@ -1081,7 +1081,7 @@ export const saveReferralService = async (
       );
     }
 
-    // Validate email
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -1090,7 +1090,7 @@ export const saveReferralService = async (
       );
     }
 
-    // Validate phone number (10-15 digits)
+    
     const phoneRegex = /^[\d\s\-+()]{10,15}$/;
     if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -1100,13 +1100,13 @@ export const saveReferralService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new referralModel({
-      // Client Details
+      
       clientFullName: (clientFullName || fullName).trim(),
       firstName: firstName ? firstName.trim() : null,
       lastName: lastName ? lastName.trim() : null,
@@ -1115,26 +1115,26 @@ export const saveReferralService = async (
       phoneNumber: phoneNumber.trim(),
       email: email.toLowerCase().trim(),
       
-      // Referrer Details
+      
       referrerName: referrerName,
       referrerOrganization: referrerOrganization,
       referrerJobTitle: referrerJobTitle,
       
-      // Referral Details
+      
       referralReason: referralReason.trim(),
       urgencyLevel: urgencyLevel || "standard",
       estimatedDischargeDate: estimatedDischargeDate || null,
       additionalInfo: additionalInfo ? additionalInfo.trim() : null,
       
-      // File Uploads
+      
       uploadedFile: uploadedFileUrl || uploadedFile || null,
       uploadedFileName: uploadedFileName || null,
       
-      // Consents
+      
       consentData: consentData || false,
       consentReferral: consentReferral || false,
       
-      // System fields
+      
       ipAddress,
       userAgent,
       formName: formName || "Referral Form",
@@ -1190,7 +1190,7 @@ export const saveCareReadinessService = async (
       formName,
     } = payload;
 
-    // Validate required fields
+    
     if (!fullName || !email || !phone || !postcode) {
       return errorResponseHandler(
         "All personal details are required",
@@ -1207,7 +1207,7 @@ export const saveCareReadinessService = async (
       );
     }
 
-    // Validate email
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -1216,7 +1216,7 @@ export const saveCareReadinessService = async (
       );
     }
 
-    // Validate phone number
+    
     const phoneRegex = /^[\d\s\-+()]{10,15}$/;
     if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -1226,7 +1226,7 @@ export const saveCareReadinessService = async (
       );
     }
 
-    // Validate postcode
+    
     const postcodeRegex = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i;
     if (!postcodeRegex.test(postcode)) {
       return errorResponseHandler(
@@ -1236,11 +1236,11 @@ export const saveCareReadinessService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Save to database
+    
     const formData = new careReadinessModel({
       fullName: fullName.trim(),
       email: email.toLowerCase().trim(),
@@ -1296,29 +1296,29 @@ export const saveFundingPathwayService = async (
 ) => {
   try {
     const {
-      // Step 1 - Care Needs Assessment
+      
       age,
       careLevel,
       careSetting,
       complexNeeds,
       
-      // Step 2 - Funding Eligibility
+      
       assets,
       income,
       medicalSupport,
       
-      // Step 3 - Contact Details
+      
       fullName,
       contactMethod,
       email,
       phone,
       
-      // System fields
+      
       source,
       formName,
     } = payload;
 
-    // Validate Step 1 - Care Needs Assessment
+    
     if (!age) {
       return errorResponseHandler(
         "Age of care recipient is required",
@@ -1343,7 +1343,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate Step 2 - Funding Eligibility
+    
     if (!assets) {
       return errorResponseHandler(
         "Assets and savings information is required",
@@ -1360,7 +1360,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate medicalSupport - handle both string and boolean
+    
     if (medicalSupport === undefined || medicalSupport === null) {
       return errorResponseHandler(
         "Medical support information is required",
@@ -1369,7 +1369,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate Step 3 - Contact Details
+    
     if (!fullName || !fullName.trim()) {
       return errorResponseHandler(
         "Full name is required",
@@ -1402,7 +1402,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate email format
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -1411,7 +1411,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate phone number (10-15 digits)
+    
     const phoneRegex = /^[\d\s\-+()]{10,15}$/;
     if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -1421,7 +1421,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate age enum
+    
     const validAges = ["Under 18", "18-64", "65-84", "85+"];
     if (!validAges.includes(age)) {
       return errorResponseHandler(
@@ -1431,7 +1431,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate care level enum
+    
     const validCareLevels = ["basic", "moderate", "extensive"];
     if (!validCareLevels.includes(careLevel)) {
       return errorResponseHandler(
@@ -1441,7 +1441,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate care setting enum
+    
     const validCareSettings = ["own-home", "with-family", "care-facility"];
     if (!validCareSettings.includes(careSetting)) {
       return errorResponseHandler(
@@ -1451,7 +1451,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate assets enum
+    
     const validAssets = ["under-23250", "23250-100000", "over-100000"];
     if (!validAssets.includes(assets)) {
       return errorResponseHandler(
@@ -1461,7 +1461,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate income enum
+    
     const validIncomes = ["Below £1,000/month", "£1,000 - £3,000/month", "Above £3,000/month"];
     if (!validIncomes.includes(income)) {
       return errorResponseHandler(
@@ -1471,7 +1471,7 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Validate contact method enum
+    
     const validContactMethods = ["email", "phone", "text"];
     if (!validContactMethods.includes(contactMethod)) {
       return errorResponseHandler(
@@ -1481,11 +1481,11 @@ export const saveFundingPathwayService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Convert string 'true'/'false' to boolean if needed
+    
     const isComplexNeeds = typeof complexNeeds === 'string' 
       ? complexNeeds === 'true' 
       : Boolean(complexNeeds);
@@ -1494,26 +1494,26 @@ export const saveFundingPathwayService = async (
       ? medicalSupport === 'true'
       : Boolean(medicalSupport);
 
-    // Save to database
+    
     const formData = new fundingPathwayModel({
-      // Step 1
+      
       age,
       careLevel,
       careSetting,
       complexNeeds: isComplexNeeds,
       
-      // Step 2
+      
       assets,
       income,
       medicalSupport: isMedicalSupport,
       
-      // Step 3
+      
       fullName: fullName.trim(),
       contactMethod,
       email: email.toLowerCase().trim(),
       phone: phone.trim(),
       
-      // System fields
+      
       ipAddress,
       userAgent,
       formName: formName || "Funding Pathway Assessment",
@@ -1558,29 +1558,29 @@ export const saveCareCostService = async (
 ) => {
   try {
     const {
-      // Personal Details
+      
       fullName,
       email,
       phone,
       postcode,
       
-      // Care Details
+      
       careFrequency,
       personalCareLevel,
       mobilityLevel,
       
-      // Specialist Care
+      
       specialistCare,
       
-      // Estimated Cost
+      
       estimatedCost,
       
-      // System fields
+      
       source,
       formName,
     } = payload;
 
-    // Validate Personal Details
+    
     if (!fullName || !fullName.trim()) {
       return errorResponseHandler(
         "Full name is required",
@@ -1613,7 +1613,7 @@ export const saveCareCostService = async (
       );
     }
 
-    // Validate email format
+    
     if (!email.includes('@') || !/\S+@\S+\.\S+/.test(email)) {
       return errorResponseHandler(
         "Invalid email format",
@@ -1622,7 +1622,7 @@ export const saveCareCostService = async (
       );
     }
 
-    // Validate phone number (10-15 digits)
+    
     const phoneRegex = /^[\d\s\-+()]{10,15}$/;
     if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
       return errorResponseHandler(
@@ -1632,7 +1632,7 @@ export const saveCareCostService = async (
       );
     }
 
-    // Validate postcode (UK format)
+    
     const postcodeRegex = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i;
     if (!postcodeRegex.test(postcode)) {
       return errorResponseHandler(
@@ -1642,7 +1642,7 @@ export const saveCareCostService = async (
       );
     }
 
-    // Validate Care Details
+    
     if (!careFrequency) {
       return errorResponseHandler(
         "Care frequency is required",
@@ -1667,7 +1667,7 @@ export const saveCareCostService = async (
       );
     }
 
-    // Validate estimated cost
+    
     if (!estimatedCost) {
       return errorResponseHandler(
         "Estimated cost is required",
@@ -1676,37 +1676,37 @@ export const saveCareCostService = async (
       );
     }
 
-    // Get IP and User Agent
+    
     const ipAddress = req.ip || req.socket?.remoteAddress || null;
     const userAgent = req.headers?.["user-agent"] || null;
 
-    // Extract specialist care values
+    
     const dementia = specialistCare?.dementia || false;
     const palliative = specialistCare?.palliative || false;
     const neurological = specialistCare?.neurological || false;
 
-    // Save to database
+    
     const formData = new careCostModel({
-      // Personal Details
+      
       fullName: fullName.trim(),
       email: email.toLowerCase().trim(),
       phone: phone.trim(),
       postcode: postcode.trim().toUpperCase(),
       
-      // Care Details
+      
       careFrequency,
       personalCareLevel,
       mobilityLevel,
       
-      // Specialist Care
+      
       dementiaCare: dementia,
       palliativeCare: palliative,
       neurologicalSupport: neurological,
       
-      // Estimated Cost
+      
       estimatedCost,
       
-      // System fields
+      
       ipAddress,
       userAgent,
       formName: formName || "Care Cost Calculator",

@@ -1,4 +1,4 @@
-// models/support.ts
+
 import mongoose from "mongoose"
 
 const supportSchema = new mongoose.Schema({
@@ -38,7 +38,7 @@ const supportSchema = new mongoose.Schema({
         default: "Open"
     },
 
-    // Who submitted the ticket
+    
     submittedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "admin",
@@ -53,7 +53,7 @@ const supportSchema = new mongoose.Schema({
         default: null
     },
 
-    // Auto-captured details
+    
     pageUrl: {
         type: String,
         default: null
@@ -78,7 +78,7 @@ const supportSchema = new mongoose.Schema({
         }
     ],
 
-    // Support team handling
+    
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "admin",
@@ -98,7 +98,7 @@ const supportSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-// Auto-generate a readable ticket id, e.g. SUP-LZ4K9A2X
+
 supportSchema.pre("validate", function (next) {
     if (!this.ticketId) {
         const random = Math.random().toString(36).substring(2, 6).toUpperCase()
@@ -107,7 +107,7 @@ supportSchema.pre("validate", function (next) {
     next()
 })
 
-// Set resolvedAt automatically when status moves to Resolved/Closed
+
 supportSchema.pre("save", function (next) {
     if (this.isModified("status")) {
         if (this.status === "Resolved" || this.status === "Closed") {

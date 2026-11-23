@@ -117,7 +117,7 @@ export const forgotPasswordService = async (payload: any, res: Response) => {
 
 
 export const newPassswordAfterOTPVerifiedService = async (payload: { password: string, otp: string }, res: Response) => {
-    // console.log('payload: ', payload);
+    
     const { password, otp } = payload
 
     const existingToken = await getPasswordResetTokenByToken(otp)
@@ -173,19 +173,19 @@ export const getAllUsersService = async (payload: any) => {
 }
 
 export const getAUserService = async (id: string, res: Response) => {
-    //   const user = await usersModel.findById(id);
-    //   if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+    
+    
 
-    //   const userProjects = await projectsModel.find({ userId: id }).select("-__v");
+    
 
-    //   return {
-    //       success: true,
-    //       message: "User retrieved successfully",
-    //       data: {
-    //           user,
-    //           projects: userProjects.length > 0 ? userProjects : [],
-    //       }
-    //   };
+    
+    
+    
+    
+    
+    
+    
+    
 }
 
 
@@ -208,23 +208,23 @@ export const updateAUserService = async (id: string, payload: any, res: Response
 
 
 export const deleteAUserService = async (id: string, res: Response) => {
-    // const user = await usersModel.findById(id);
-    // if (!user) return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res);
+    
+    
 
-    // // Delete user projects ----
-    // const userProjects = await projectsModel.deleteMany({ userId: id })
+    
+    
 
-    // // Delete user ----
-    // await usersModel.findByIdAndDelete(id)
+    
+    
 
-    // return {
-    //     success: true,
-    //     message: "User deleted successfully",
-    //     data: {
-    //         user,
-    //         projects: userProjects
-    //     }
-    // }
+    
+    
+    
+    
+    
+    
+    
+    
 }
 
 
@@ -263,7 +263,7 @@ export const getUserInfoService = async (id: string, res: Response) => {
 };
 
 export const createuserService = async (payload: any, res: Response) => {
-  // Check if the email already exists
+  
   const existingUser = await usersModel.findOne({ email: payload.email });
 
   if (existingUser) {
@@ -274,7 +274,7 @@ export const createuserService = async (payload: any, res: Response) => {
     );
   }
 
-  // Proceed with creating the user
+  
   const currentUserId = payload.currentUser;
 
   const identifier = customAlphabet("0123456789", 3);
@@ -300,7 +300,7 @@ export const updateAPasswordService = async (payload: any, res: Response) => {
 
   if (!user) { return errorResponseHandler("User not found", httpStatusCode.NOT_FOUND, res); }
 
-  // Check current password
+  
   const isPasswordMatched = await bcrypt.compare(
     currentPassword,
     user.password
@@ -314,11 +314,11 @@ export const updateAPasswordService = async (payload: any, res: Response) => {
     );
   }
 
-  // Hash new password
+  
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-  // Update password
+  
   await adminModel.findByIdAndUpdate(
     userId,
     {
@@ -337,35 +337,35 @@ export const updateAPasswordService = async (payload: any, res: Response) => {
 
 
 
-// Dashboard
 
-// Get dashboard statistics
+
+
 export const getDashboardStatsService = async (req: any, res: Response) => {
   try {
-    // ============ CANDIDATE STATS ============
+    
     const totalApplicants = await candidateModel.countDocuments({ isDeleted: false });
     const activeApplicants = await candidateModel.countDocuments({ 
       isDeleted: false, 
-      // No status field in candidate schema, so count all non-deleted
+      
     });
     const pendingReviews = await candidateModel.countDocuments({ 
       isDeleted: false,
-      // Use any field that indicates pending review, or just count all
+      
     });
 
-    // ============ JOB STATS ============
+    
     const activeVacancies = await jobModel.countDocuments({ 
       isDeleted: false, 
       status: "Open" 
     });
 
-    // ============ CHART DATA ============
-    // Get monthly data for the last 12 months
+    
+    
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonth = new Date().getMonth();
     
     const chartData = months.map((month, index) => {
-      // Generate realistic data based on actual counts
+      
       const baseActive = Math.floor(activeApplicants / 12) + (index * 3);
       const baseConverted = Math.floor(totalApplicants / 20) + (index * 1.5);
       
@@ -376,8 +376,8 @@ export const getDashboardStatsService = async (req: any, res: Response) => {
       };
     });
 
-    // ============ PIE CHART DATA ============
-    // Since candidate schema doesn't have status, create realistic distribution
+    
+    
     const pieData = [
       { name: 'Active', value: Math.floor(totalApplicants * 0.35), color: '#10B981' },
       { name: 'In Review', value: Math.floor(totalApplicants * 0.25), color: '#27B3C9' },
@@ -389,7 +389,7 @@ export const getDashboardStatsService = async (req: any, res: Response) => {
 
     const totalCandidates = totalApplicants;
 
-    // ============ USERS ============
+    
     const users = await usersModel.find({ isActive: true })
       .limit(4)
       .sort({ createdAt: -1 })
@@ -412,7 +412,7 @@ export const getDashboardStatsService = async (req: any, res: Response) => {
       };
     });
 
-    // ============ RECENT CANDIDATES ============
+    
     const recentCandidates = await candidateModel.find({ isDeleted: false })
       .sort({ createdAt: -1 })
       .limit(4)
@@ -429,14 +429,14 @@ export const getDashboardStatsService = async (req: any, res: Response) => {
         role: candidate.positionAppliedFor || 'N/A',
         source: 'Direct',
         time: getTimeAgo(candidate.createdAt),
-        status: 'New', // Default status since no status field
+        status: 'New', 
         initials: getInitials(name),
         color: getColor(name)
       };
     });
 
-    // ============ GROWTH PERCENTAGES ============
-    // Calculate based on actual data where possible
+    
+    
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
     
@@ -478,7 +478,7 @@ export const getDashboardStatsService = async (req: any, res: Response) => {
   }
 };
 
-// Helper function to get initials
+
 function getInitials(name: string): string {
   if (!name) return '??';
   const nameParts = name.trim().split(' ');
@@ -486,7 +486,7 @@ function getInitials(name: string): string {
   return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
 }
 
-// Helper function to get color
+
 function getColor(name: string): string {
   if (!name) return '#0F4C81';
   const colors = ['#0F4C81', '#27B3C9', '#7C3AED', '#059669', '#D97706', '#DC2626', '#2563EB', '#0891B2'];
@@ -494,7 +494,7 @@ function getColor(name: string): string {
   return colors[index];
 }
 
-// Helper function to get time ago
+
 function getTimeAgo(date: Date): string {
   if (!date) return 'Just now';
   
@@ -511,7 +511,7 @@ function getTimeAgo(date: Date): string {
   return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
 }
 
-// Get all roles
+
 export const getRolesService = async (req: any, res: Response) => {
   try {
     const roles = await roleModel.find({ isActive: true })
@@ -533,7 +533,7 @@ export const getRolesService = async (req: any, res: Response) => {
   }
 };
 
-// Get single role by ID
+
 export const getAroleService = async (id: string, res: Response) => {
   try {
     const role = await roleModel.findById(id).select("-__v");
@@ -561,10 +561,10 @@ export const createRoleService = async (
   res: Response
 ) => {
   try {
-    // Log payload for debugging
+    
     console.log('Create Role Payload:', JSON.stringify(payload, null, 2));
 
-    // Check if payload exists
+    
     if (!payload) {
       return errorResponseHandler(
         "Request body is empty",
@@ -573,12 +573,12 @@ export const createRoleService = async (
       );
     }
 
-    // Extract data from payload - handle the structure: { userId, body }
+    
     const body = payload.body || payload;
     const userId = payload.userId || "system";
     const { name, description, color, permissions } = body;
 
-    // Validate required fields
+    
     if (!name) {
       return errorResponseHandler(
         "Role name is required",
@@ -596,7 +596,7 @@ export const createRoleService = async (
       );
     }
 
-    // Check if role already exists
+    
     const existingRole = await roleModel.findOne({
       name: trimmedName
     });
@@ -609,7 +609,7 @@ export const createRoleService = async (
       );
     }
 
-    // Create new role
+    
     const newRole = new roleModel({
       name: trimmedName,
       description: description || null,
@@ -636,7 +636,7 @@ export const createRoleService = async (
   }
 };
 
-// Update role
+
 export const updateAroleService = async (id: string, payload: any, res: Response) => {
   try {
     const { name, description, color, permissions, isActive } = payload;
@@ -647,7 +647,7 @@ export const updateAroleService = async (id: string, payload: any, res: Response
       return errorResponseHandler("Role not found", httpStatusCode.NOT_FOUND, res);
     }
 
-    // Check if name is taken by another role
+    
     if (name && name !== role.name) {
       const existingRole = await roleModel.findOne({ 
         name: name.trim(),
@@ -664,7 +664,7 @@ export const updateAroleService = async (id: string, payload: any, res: Response
       role.name = name.trim();
     }
 
-    // Update fields
+    
     if (description !== undefined) role.description = description;
     if (color) role.color = color;
     if (permissions) role.permissions = permissions;
@@ -686,7 +686,7 @@ export const updateAroleService = async (id: string, payload: any, res: Response
   }
 };
 
-// Delete role (soft delete)
+
 export const deleteRoleService = async (id: string, res: Response) => {
   try {
     const role = await roleModel.findById(id);
@@ -695,7 +695,7 @@ export const deleteRoleService = async (id: string, res: Response) => {
       return errorResponseHandler("Role not found", httpStatusCode.NOT_FOUND, res);
     }
 
-    // Check if role has users assigned
+    
     if (role.userCount > 0) {
       return errorResponseHandler(
         "Cannot delete role with assigned users",
@@ -704,7 +704,7 @@ export const deleteRoleService = async (id: string, res: Response) => {
       );
     }
 
-    // Check if role is default
+    
     if (role.isDefault) {
       return errorResponseHandler(
         "Cannot delete default role",
@@ -713,7 +713,7 @@ export const deleteRoleService = async (id: string, res: Response) => {
       );
     }
 
-    // Soft delete
+    
     role.isActive = false;
     await role.save();
 
@@ -731,7 +731,7 @@ export const deleteRoleService = async (id: string, res: Response) => {
   }
 };
 
-// Initialize default roles
+
 export const initializeDefaultRolesService = async (  payload: any,
   res: Response) => {
   try {
@@ -773,7 +773,7 @@ export const initializeDefaultRolesService = async (  payload: any,
   }
 };
 
-// Get default roles list
+
 export const getDefaultRolesListService = async (res: Response) => {
   try {
     return {
@@ -791,37 +791,37 @@ export const getDefaultRolesListService = async (res: Response) => {
 };
 
 
-// Get all jobs with pagination and filtering
+
 export const getAllJobsService = async (payload: any) => {
   try {
     const page = parseInt(payload.page as string) || 1;
     const limit = parseInt(payload.limit as string) || 10;
     const skip = (page - 1) * limit;
     
-    // Build query
+    
     const query: any = { isDeleted: false };
     
-    // Filter by status
+    
     if (payload.status) {
       query.status = payload.status;
     }
     
-    // Filter by availability
+    
     if (payload.availability) {
       query.availability = payload.availability;
     }
     
-    // Filter by contract type
+    
     if (payload.contractType) {
       query.contractType = payload.contractType;
     }
     
-    // Filter by location
+    
     if (payload.location) {
       query.locations = { $in: [payload.location] };
     }
     
-    // Search by title or notes
+    
     if (payload.search) {
       query.$or = [
         { jobTitle: { $regex: payload.search, $options: "i" } },
@@ -829,7 +829,7 @@ export const getAllJobsService = async (payload: any) => {
       ];
     }
     
-    // Sort
+    
     const sort: any = {};
     const sortField = payload.sortBy || "createdAt";
     const sortOrder = payload.sortOrder === "asc" ? 1 : -1;
@@ -871,7 +871,7 @@ export const getAllJobsService = async (payload: any) => {
   }
 };
 
-// Get single job by ID with applied candidates
+
 export const getJobInfoService = async (id: string, res: Response) => {
   try {
     const job = await jobModel.findOne({
@@ -887,28 +887,28 @@ export const getJobInfoService = async (id: string, res: Response) => {
       );
     }
 
-    // const applications = await applicationModel.find({
-    //   jobId: id,
-    //   isDeleted: false,
-    // });
+    
+    
+    
+    
 
-    // const applicationsWithCandidates = await Promise.all(
-    //   applications.map(async (application) => {
-    //     const candidate = await candidateModel.findById(application.candidateId);
+    
+    
+    
 
-    //     return {
-    //       ...application.toObject(),
-    //       candidate,
-    //     };
-    //   })
-    // );
+    
+    
+    
+    
+    
+    
 
     return {
       success: true,
       message: "Job retrieved successfully",
       data: {
         ...job.toObject(),
-        // applications: applicationsWithCandidates,
+        
       },
     };
   } catch (error: any) {
@@ -920,7 +920,7 @@ export const getJobInfoService = async (id: string, res: Response) => {
   }
 };
 
-// Create job (Draft or Publish)
+
 export const createJobService = async (payload: any, userId: string, res: Response) => {
   try {
     const {
@@ -947,7 +947,7 @@ export const createJobService = async (payload: any, userId: string, res: Respon
       requireReferences
     } = payload;
 
-    // Validate required fields
+    
     if (!jobTitle || !availability || !experience || !contractType || 
         !locations || locations.length === 0 || !salaryMin || !salaryMax || !deadline) {
       return errorResponseHandler(
@@ -957,7 +957,7 @@ export const createJobService = async (payload: any, userId: string, res: Respon
       );
     }
 
-    // Create new job
+    
     const newJob = new jobModel({
       jobTitle: jobTitle.trim(),
       availability,
@@ -1000,7 +1000,7 @@ export const createJobService = async (payload: any, userId: string, res: Respon
   }
 };
 
-// Update job
+
 export const updateJobService = async (id: string, payload: any, res: Response) => {
   try {
     const job = await jobModel.findOne({ _id: id, isDeleted: false });
@@ -1033,7 +1033,7 @@ export const updateJobService = async (id: string, payload: any, res: Response) 
       requireReferences
     } = payload;
 
-    // Update fields
+    
     if (jobTitle) job.jobTitle = jobTitle.trim();
     if (availability) job.availability = availability;
     if (experience) job.experience = experience;
@@ -1056,7 +1056,7 @@ export const updateJobService = async (id: string, payload: any, res: Response) 
     if (requireDBS !== undefined) job.requireDBS = requireDBS;
     if (requireReferences !== undefined) job.requireReferences = requireReferences;
 
-    // If status changed to Open, set publishedAt
+    
     if (status === "Open" && job.status !== "Open") {
       job.publishedAt = new Date();
     }
@@ -1078,7 +1078,7 @@ export const updateJobService = async (id: string, payload: any, res: Response) 
   }
 };
 
-// Delete job (soft delete)
+
 export const deleteJobService = async (id: string, res: Response) => {
   try {
     const job = await jobModel.findOne({ _id: id, isDeleted: false });
@@ -1087,7 +1087,7 @@ export const deleteJobService = async (id: string, res: Response) => {
       return errorResponseHandler("Job not found", httpStatusCode.NOT_FOUND, res);
     }
 
-    // Soft delete
+    
     job.isDeleted = true;
     job.status = "Archived";
     await job.save();
@@ -1106,7 +1106,7 @@ export const deleteJobService = async (id: string, res: Response) => {
   }
 };
 
-// Publish job
+
 export const publishJobService = async (id: string, res: Response) => {
   try {
     const job = await jobModel.findOne({ _id: id, isDeleted: false });
@@ -1115,7 +1115,7 @@ export const publishJobService = async (id: string, res: Response) => {
       return errorResponseHandler("Job not found", httpStatusCode.NOT_FOUND, res);
     }
 
-    // Check if all required fields are filled
+    
     const requiredFields = [
       job.jobTitle,
       job.availability,
@@ -1159,7 +1159,7 @@ export const publishJobService = async (id: string, res: Response) => {
   }
 };
 
-// Get job statistics
+
 export const getJobStatsService = async () => {
   try {
     const total = await jobModel.countDocuments({ isDeleted: false });
@@ -1202,7 +1202,7 @@ export const SupportService = async (payload: any, userId: string, res: Response
       language
     } = payload;
 
-    // Validate required fields
+    
     if (!subject || !message) {
       return errorResponseHandler(
         "Missing required fields. Please enter a subject and message.",
@@ -1235,7 +1235,7 @@ export const SupportService = async (payload: any, userId: string, res: Response
       return errorResponseHandler("Invalid priority.", httpStatusCode.BAD_REQUEST, res);
     }
 
-    // Sanitize attachments array and convert relative paths to full URLs (max 5 items)
+    
     const sanitizedAttachments = Array.isArray(attachments)
       ? attachments
           .filter((item) => item && typeof item.url === "string" && item.url.trim())
@@ -1247,13 +1247,13 @@ export const SupportService = async (payload: any, userId: string, res: Response
           }))
       : [];
 
-    // Get submitter details from logged in admin
+    
     const admin = await adminModel.findById(userId).select("name email");
     if (!admin) {
       return errorResponseHandler("User not found.", httpStatusCode.NOT_FOUND, res);
     }
 
-    // Create new ticket
+    
     const newTicket = new supportModel({
       category: category || "it-issue",
       priority: priority || "Medium",
@@ -1272,8 +1272,8 @@ export const SupportService = async (payload: any, userId: string, res: Response
 
     await newTicket.save();
 
-    // Notify support team by email.
-    // If the email fails, the ticket is still saved and the user still gets success.
+    
+    
     try {
       await sendSupportTicketMailToSupport({
         ticketId: newTicket.ticketId as string,

@@ -209,14 +209,14 @@ const jobSchema = new Schema<IJob>(
   }
 );
 
-// Indexes
+
 jobSchema.index({ jobTitle: "text", notes: "text" });
 jobSchema.index({ status: 1, createdAt: -1 });
 jobSchema.index({ locations: 1 });
 jobSchema.index({ availability: 1, contractType: 1 });
 jobSchema.index({ isDeleted: 1 });
 
-// Pre-save middleware
+
 jobSchema.pre<IJob>("save", function(next) {
   if (this.isModified("status") && (this.status === "Open" || this.status === "Published")) {
     this.publishedAt = new Date();

@@ -1,9 +1,9 @@
-// models/website/trainingBookingSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const TrainingBookingSchema = new Schema(
   {
-    // Step 1 - Personal & Contact
+    
     fullLegalName: {
       type: String,
       required: true,
@@ -44,7 +44,7 @@ const TrainingBookingSchema = new Schema(
       trim: true,
     },
 
-    // Step 2 - Emergency Contacts
+    
     contactPhone: {
       type: String,
       required: true,
@@ -73,7 +73,7 @@ const TrainingBookingSchema = new Schema(
       default: null,
     },
 
-    // Step 3 - Eligibility & Vetting
+    
     rightToWorkStatus: {
       type: String,
       required: true,
@@ -95,7 +95,7 @@ const TrainingBookingSchema = new Schema(
       trim: true,
     },
 
-    // Step 4 - Experience & Qualifications
+    
     trainingCourseRequired: {
       type: String,
       required: true,
@@ -122,7 +122,7 @@ const TrainingBookingSchema = new Schema(
       default: null,
     },
 
-    // Step 5 - Health & Accessibility
+    
     healthCondition: {
       type: String,
       default: null,
@@ -144,7 +144,7 @@ const TrainingBookingSchema = new Schema(
       default: null,
     },
 
-    // Step 6 - Declarations & Consents
+    
     fullName: {
       type: String,
       required: true,
@@ -166,7 +166,7 @@ const TrainingBookingSchema = new Schema(
       trim: true,
     },
 
-    // System fields
+    
     formName: {
       type: String,
       default: "Training Service Booking",

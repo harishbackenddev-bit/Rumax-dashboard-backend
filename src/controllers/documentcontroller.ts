@@ -1,9 +1,9 @@
-// controllers/document.controller.ts
+
 import { Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 
-// ============ PROFILE IMAGE UPLOAD ============
+
 export const profileUpdate = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
@@ -13,7 +13,7 @@ export const profileUpdate = async (req: Request, res: Response) => {
       });
     }
 
-    // Get the file URL (relative path from public directory)
+    
     const imageUrl = `/uploads/profiles/${req.file.filename}`;
 
     res.status(200).json({
@@ -36,7 +36,7 @@ export const profileUpdate = async (req: Request, res: Response) => {
   }
 };
 
-// ============ DOCUMENT UPLOAD ============
+
 export const documentUpload = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
@@ -69,7 +69,7 @@ export const documentUpload = async (req: Request, res: Response) => {
   }
 };
 
-// ============ MULTIPLE DOCUMENTS UPLOAD ============
+
 export const multipleDocumentsUpload = async (req: Request, res: Response) => {
   try {
     const files = req.files as Express.Multer.File[];
@@ -107,7 +107,7 @@ export const multipleDocumentsUpload = async (req: Request, res: Response) => {
   }
 };
 
-// ============ CERTIFICATE UPLOAD ============
+
 export const certificateUpload = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
@@ -139,7 +139,7 @@ export const certificateUpload = async (req: Request, res: Response) => {
   }
 };
 
-// ============ DELETE DOCUMENT ============
+
 export const deleteDocument = async (req: Request, res: Response) => {
   try {
     const { filePath } = req.body;
@@ -151,11 +151,11 @@ export const deleteDocument = async (req: Request, res: Response) => {
       });
     }
 
-    // Remove leading slash if present
+    
     const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
     const fullPath = path.join(__dirname, '..', cleanPath);
 
-    // Check if file exists
+    
     if (!fs.existsSync(fullPath)) {
       return res.status(404).json({
         success: false,
@@ -163,7 +163,7 @@ export const deleteDocument = async (req: Request, res: Response) => {
       });
     }
 
-    // Delete the file
+    
     fs.unlinkSync(fullPath);
 
     res.status(200).json({

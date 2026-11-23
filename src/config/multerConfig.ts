@@ -1,10 +1,10 @@
-// config/multer.config.ts
+
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 
-// ============ PROFILE IMAGE UPLOAD ============
+
 const profileUploadDir = "public/uploads/profiles";
 if (!fs.existsSync(profileUploadDir)) fs.mkdirSync(profileUploadDir, { recursive: true });
 
@@ -28,11 +28,11 @@ const profileFileFilter = (req: any, file: any, cb: any) => {
 
 export const uploadProfile = multer({
   storage: profileStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 }, 
   fileFilter: profileFileFilter,
 });
 
-// ============ DOCUMENT UPLOAD (for job applications) ============
+
 const documentUploadDir = "public/uploads/documents";
 if (!fs.existsSync(documentUploadDir)) fs.mkdirSync(documentUploadDir, { recursive: true });
 
@@ -51,7 +51,7 @@ const allowedTypes = /pdf|doc|docx|jpg|jpeg|png|txt|mp4|webm|mov|avi|mkv/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
 
-  // Allow PDF, DOC, DOCX, JPG, JPEG, PNG, TXT
+  
   if (mimetype && extname) {
     cb(null, true);
   } else {
@@ -61,18 +61,18 @@ const allowedTypes = /pdf|doc|docx|jpg|jpeg|png|txt|mp4|webm|mov|avi|mkv/;
 
 export const uploadDocument = multer({
   storage: documentStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024 }, 
   fileFilter: documentFileFilter,
 });
 
-// ============ MULTIPLE DOCUMENTS UPLOAD ============
+
 export const uploadMultipleDocuments = multer({
   storage: documentStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
+  limits: { fileSize: 10 * 1024 * 1024 }, 
   fileFilter: documentFileFilter,
-}).array('documents', 10); // Max 10 files
+}).array('documents', 10); 
 
-// ============ SINGLE DOCUMENT UPLOAD (with custom field name) ============
+
 export const uploadSingleDocument = (fieldName: string) => {
   return multer({
     storage: documentStorage,
@@ -81,7 +81,7 @@ export const uploadSingleDocument = (fieldName: string) => {
   }).single(fieldName);
 };
 
-// ============ TRAINING CERTIFICATE UPLOAD ============
+
 const certificateUploadDir = "public/uploads/certificates";
 if (!fs.existsSync(certificateUploadDir)) fs.mkdirSync(certificateUploadDir, { recursive: true });
 
@@ -108,6 +108,6 @@ const certificateFileFilter = (req: any, file: any, cb: any) => {
 
 export const uploadCertificate = multer({
   storage: certificateStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024 }, 
   fileFilter: certificateFileFilter,
 });

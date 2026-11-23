@@ -1,9 +1,9 @@
-// models/website/careReadinessSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const CareReadinessSchema = new Schema(
   {
-    // Personal Details
+    
     fullName: {
       type: String,
       required: true,
@@ -27,7 +27,7 @@ const CareReadinessSchema = new Schema(
       uppercase: true,
     },
     
-    // Assessment Results
+    
     totalScore: {
       type: Number,
       required: true,
@@ -49,14 +49,14 @@ const CareReadinessSchema = new Schema(
       default: [],
     },
     
-    // Individual Answers
+    
     answers: {
       type: Map,
       of: Number,
       default: {},
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Care Readiness Assessment",
@@ -84,14 +84,14 @@ const CareReadinessSchema = new Schema(
   }
 );
 
-// Add indexes
+
 CareReadinessSchema.index({ email: 1 });
 CareReadinessSchema.index({ phone: 1 });
 CareReadinessSchema.index({ postcode: 1 });
 CareReadinessSchema.index({ totalScore: 1 });
 CareReadinessSchema.index({ createdAt: -1 });
 
-// Pre-save middleware
+
 CareReadinessSchema.pre('save', function(next) {
   if (this.email) {
     this.email = this.email.toLowerCase().trim();

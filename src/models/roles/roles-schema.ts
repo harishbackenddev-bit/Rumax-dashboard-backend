@@ -97,22 +97,22 @@ const roleSchema = new Schema<IRole>(
   }
 );
 
-// Virtual for formatted role name
+
 roleSchema.virtual('formattedName').get(function() {
   return this.name.charAt(0).toUpperCase() + this.name.slice(1);
 });
 
-// Indexes for better performance
+
 roleSchema.index({ name: 1 });
 roleSchema.index({ isActive: 1 });
 roleSchema.index({ isDefault: 1 });
 roleSchema.index({ createdBy: 1 });
 roleSchema.index({ createdAt: -1 });
 
-// Compound index for common queries
+
 roleSchema.index({ isActive: 1, isDefault: 1 });
 
-// Pre-save middleware to ensure default roles remain active
+
 roleSchema.pre('save', function(next) {
   if (this.isDefault) {
     this.isActive = true;
@@ -120,10 +120,10 @@ roleSchema.pre('save', function(next) {
   next();
 });
 
-// Pre-update middleware
+
 roleSchema.pre('findOneAndUpdate', function(next) {
   const update = this.getUpdate() as any;
-  // If trying to deactivate a default role, prevent it
+  
   if (update.isActive === false) {
     const error = new Error('Cannot deactivate a default role');
     return next(error);
@@ -131,12 +131,12 @@ roleSchema.pre('findOneAndUpdate', function(next) {
   next();
 });
 
-// Static method to get default roles
+
 roleSchema.static('getDefaultRoles', function() {
   return this.find({ isDefault: true, isActive: true });
 });
 
-// Static method to get roles by user
+
 roleSchema.static('getRolesByUser', function(userId: string) {
   return this.find({ createdBy: userId, isActive: true });
 });

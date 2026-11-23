@@ -1,9 +1,9 @@
-// utils/email-service.ts
+
 import nodemailer from 'nodemailer';
 
-// ============================================
-// SEND STATUS UPDATE EMAIL
-// ============================================
+
+
+
 export const sendStatusUpdateEmail = async (data: {
   candidateEmail: string;
   candidateName: string;
@@ -21,7 +21,7 @@ export const sendStatusUpdateEmail = async (data: {
   try {
     const { candidateEmail, candidateName, status, jobTitle, oldStatus, rejectionReason, interviewDetails } = data;
 
-    // Get email template
+    
     const { subject, html } = getStatusEmailTemplate({
       candidateName,
       status,
@@ -31,7 +31,7 @@ export const sendStatusUpdateEmail = async (data: {
       interviewDetails
     });
 
-    // Send email
+    
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
@@ -58,9 +58,9 @@ export const sendStatusUpdateEmail = async (data: {
   }
 };
 
-// ============================================
-// SEND DOCUMENT REQUEST EMAIL
-// ============================================
+
+
+
 export const sendDocumentRequestEmail = async (data: {
   candidateEmail: string;
   candidateName: string;
@@ -71,7 +71,7 @@ export const sendDocumentRequestEmail = async (data: {
   try {
     const { candidateEmail, candidateName, documents, note, jobTitle } = data;
 
-    // Generate document list HTML
+    
     const documentList = documents.map(doc => `
       <li style="padding: 8px 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 6px; list-style: none;">
         📄 ${doc}
@@ -136,7 +136,7 @@ export const sendDocumentRequestEmail = async (data: {
       </div>
     `;
 
-    // Send email
+    
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
@@ -163,9 +163,9 @@ export const sendDocumentRequestEmail = async (data: {
   }
 };
 
-// ============================================
-// STATUS EMAIL TEMPLATE GENERATOR
-// ============================================
+
+
+
 const getStatusEmailTemplate = (data: {
   candidateName: string;
   status: string;
@@ -303,7 +303,7 @@ const getStatusEmailTemplate = (data: {
       break;
   }
 
-  // Wrap with template
+  
   const fullHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff;">
       <div style="background: ${color}; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">

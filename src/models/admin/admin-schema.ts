@@ -48,7 +48,7 @@ const adminSchema = new mongoose.Schema({
         type: String,
         default: null 
     },
-    twoFactorAuth: {  // <-- Add this field
+    twoFactorAuth: {  
         type: Boolean,
         default: false
     },

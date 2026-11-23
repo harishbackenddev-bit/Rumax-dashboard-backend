@@ -1,9 +1,9 @@
-// models/website/feedbackSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const FeedbackSchema = new Schema(
   {
-    // Personal Information
+    
     firstName: {
       type: String,
       required: true,
@@ -31,7 +31,7 @@ const FeedbackSchema = new Schema(
       trim: true,
     },
     
-    // Feedback Details
+    
     urgency: {
       type: String,
       required: true,
@@ -53,7 +53,7 @@ const FeedbackSchema = new Schema(
       trim: true,
     },
     
-    // File attachments
+    
     attachmentUrl: {
       type: String,
       default: null,
@@ -79,7 +79,7 @@ const FeedbackSchema = new Schema(
       default: 0,
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Feedback Form",
@@ -107,7 +107,7 @@ const FeedbackSchema = new Schema(
   }
 );
 
-// Add indexes for better query performance
+
 FeedbackSchema.index({ email: 1 });
 FeedbackSchema.index({ phoneNumber: 1 });
 FeedbackSchema.index({ status: 1 });
@@ -115,14 +115,14 @@ FeedbackSchema.index({ createdAt: -1 });
 FeedbackSchema.index({ source: 1 });
 FeedbackSchema.index({ feedbackMethod: 1 });
 
-// Pre-save middleware to format data
+
 FeedbackSchema.pre('save', function(next) {
-  // Format email to lowercase
+  
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
   }
   
-  // Trim all string fields
+  
   if (this.firstName) {
     this.firstName = this.firstName.trim();
   }
@@ -142,7 +142,7 @@ FeedbackSchema.pre('save', function(next) {
   next();
 });
 
-// Static method to get statistics
+
 FeedbackSchema.statics.getStats = async function() {
   const total = await this.countDocuments();
   const today = new Date();
@@ -182,17 +182,17 @@ FeedbackSchema.statics.getStats = async function() {
   };
 };
 
-// Static method to find by email
+
 FeedbackSchema.statics.findByEmail = function(email: string) {
   return this.find({ email: email.toLowerCase().trim() });
 };
 
-// Static method to find by status
+
 FeedbackSchema.statics.findByStatus = function(status: string) {
   return this.find({ status });
 };
 
-// Static method to find by date range
+
 FeedbackSchema.statics.findByDateRange = function(startDate: Date, endDate: Date) {
   return this.find({
     createdAt: {

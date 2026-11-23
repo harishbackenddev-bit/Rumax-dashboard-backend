@@ -1,7 +1,7 @@
-// models/candidate-schema.ts
+
 import { Schema, model, Document } from "mongoose";
 
-// Education sub-document
+
 export interface IEducation {
   id: string;
   institution: string;
@@ -11,7 +11,7 @@ export interface IEducation {
   grade: string;
 }
 
-// Experience sub-document
+
 export interface IExperience {
   id: string;
   employer: string;
@@ -22,7 +22,7 @@ export interface IExperience {
   responsibilities: string;
 }
 
-// Training sub-document
+
 export interface ITraining {
   id: string;
   name: string;
@@ -32,7 +32,7 @@ export interface ITraining {
   certificate: string;
 }
 
-// Registration sub-document
+
 export interface IRegistration {
   id: string;
   body: string;
@@ -40,7 +40,7 @@ export interface IRegistration {
   expiryDate: string;
 }
 
-// Reference sub-document
+
 export interface IReference {
   id: string;
   fullName: string;
@@ -53,7 +53,7 @@ export interface IReference {
   type: 'Professional' | 'Manager' | 'Character Reference';
 }
 
-// Availability schedule
+
 export interface IAvailabilitySchedule {
   monday: string[];
   tuesday: string[];
@@ -64,14 +64,14 @@ export interface IAvailabilitySchedule {
   sunday: string[];
 }
 
-// Scenario answers
+
 export interface IScenarioAnswers {
   q1: string;
   q2: string;
   q3: string;
 }
 
-// Status history entry
+
 export interface IStatusHistory {
   status: string;
   jobId?: string;
@@ -83,7 +83,7 @@ export interface IStatusHistory {
 }
 
 export interface ICandidate extends Document {
-  // Step 1: Personal Information
+  
   firstName: string;
   lastName: string;
   email: string;
@@ -98,7 +98,7 @@ export interface ICandidate extends Document {
   rightToWork: string;
   photoUrl: string;
   
-  // Step 2: Role & Availability (Preferences)
+  
   positionAppliedFor: string;
   workPreference: 'Full Time' | 'Part Time' | 'Bank Hours' | 'Contract';
   preferredLocations: string[];
@@ -107,13 +107,13 @@ export interface ICandidate extends Document {
   ownVehicle: boolean;
   shiftConfirmation: boolean;
   
-  // Step 3: Qualifications & Experience
+  
   education: IEducation[];
   experience: IExperience[];
   training: ITraining[];
   registrations: IRegistration[];
   
-  // Step 4: Compliance & References
+  
   references: IReference[];
   dbsValid: boolean;
   disciplinaryAction: boolean;
@@ -123,13 +123,13 @@ export interface ICandidate extends Document {
   dbsCertificateUrl: string;
   referencesUrl: string;
   
-  // Step 5: Values & Assessment
+  
   heardFrom: string;
   supportingStatement: string;
   scenarioAnswers: IScenarioAnswers;
   coreValues: string[];
   
-  // Metadata
+  
   resumeUrl: string;
   coverLetterUrl: string;
   coverLetter: string;
@@ -138,13 +138,13 @@ export interface ICandidate extends Document {
   createdAt: Date;
   updatedAt: Date;
   
-  // Computed fields
+  
   fullName: string;
   initials: string;
   color: string;
 }
 
-// Education Schema
+
 const educationSchema = new Schema<IEducation>({
   id: { type: String, required: true },
   institution: { type: String, required: true },
@@ -154,7 +154,7 @@ const educationSchema = new Schema<IEducation>({
   grade: { type: String, default: '' }
 });
 
-// Experience Schema
+
 const experienceSchema = new Schema<IExperience>({
   id: { type: String, required: true },
   employer: { type: String, required: true },
@@ -165,7 +165,7 @@ const experienceSchema = new Schema<IExperience>({
   responsibilities: { type: String, default: '' }
 });
 
-// Training Schema
+
 const trainingSchema = new Schema<ITraining>({
   id: { type: String, required: true },
   name: { type: String, required: true },
@@ -175,7 +175,7 @@ const trainingSchema = new Schema<ITraining>({
   certificate: { type: String, default: '' }
 });
 
-// Registration Schema
+
 const registrationSchema = new Schema<IRegistration>({
   id: { type: String, required: true },
   body: { type: String, required: true },
@@ -183,7 +183,7 @@ const registrationSchema = new Schema<IRegistration>({
   expiryDate: { type: String, required: true }
 });
 
-// Reference Schema
+
 const referenceSchema = new Schema<IReference>({
   id: { type: String, required: true },
   fullName: { type: String, required: true },
@@ -200,7 +200,7 @@ const referenceSchema = new Schema<IReference>({
   }
 });
 
-// Availability Schedule Schema
+
 const availabilityScheduleSchema = new Schema<IAvailabilitySchedule>({
   monday: { type: [String], default: [] },
   tuesday: { type: [String], default: [] },
@@ -211,14 +211,14 @@ const availabilityScheduleSchema = new Schema<IAvailabilitySchedule>({
   sunday: { type: [String], default: [] }
 });
 
-// Scenario Answers Schema
+
 const scenarioAnswersSchema = new Schema<IScenarioAnswers>({
   q1: { type: String, required: true },
   q2: { type: String, required: true },
   q3: { type: String, required: true }
 });
 
-// Status History Schema
+
 const statusHistorySchema = new Schema<IStatusHistory>({
   status: { type: String, required: true },
   jobId: { type: String, default: '' },
@@ -229,10 +229,10 @@ const statusHistorySchema = new Schema<IStatusHistory>({
   reason: { type: String, default: '' }
 });
 
-// Main Candidate Schema
+
 const candidateSchema = new Schema<ICandidate>(
   {
-    // Step 1: Personal Information
+    
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -255,7 +255,7 @@ const candidateSchema = new Schema<ICandidate>(
       enum: ['British Citizen', 'Indefinite Leave', 'Skilled Worker Visa', 'Student Visa', 'Other']
     },
 
-    // Step 2: Role & Availability
+    
     positionAppliedFor: { type: String, required: true, trim: true },
     workPreference: { 
       type: String, 
@@ -268,13 +268,13 @@ const candidateSchema = new Schema<ICandidate>(
     ownVehicle: { type: Boolean, default: false },
     shiftConfirmation: { type: Boolean, default: false },
 
-    // Step 3: Qualifications & Experience
+    
     education: { type: [educationSchema], default: [] },
     experience: { type: [experienceSchema], default: [] },
     training: { type: [trainingSchema], default: [] },
     registrations: { type: [registrationSchema], default: [] },
 
-    // Step 4: Compliance & References
+    
     references: { type: [referenceSchema], default: [] },
     dbsValid: { type: Boolean, required: true },
     disciplinaryAction: { type: Boolean, required: true },
@@ -284,7 +284,7 @@ const candidateSchema = new Schema<ICandidate>(
     dbsCertificateUrl: { type: String, default: '' },
     referencesUrl: { type: String, default: '' },
 
-    // Step 5: Values & Assessment
+    
     heardFrom: { 
       type: String, 
       required: true,
@@ -294,9 +294,9 @@ const candidateSchema = new Schema<ICandidate>(
     scenarioAnswers: { type: scenarioAnswersSchema, required: true },
     coreValues: { type: [String], default: ['Compassion', 'Respect', 'Integrity', 'Continuous Learning', 'Excellence'] },
 
-    // ============================================
-    // STATUS & APPLICATION TRACKING
-    // ============================================
+    
+    
+    
     status: { 
       type: String, 
       required: true,
@@ -306,34 +306,34 @@ const candidateSchema = new Schema<ICandidate>(
     appliedDate: { type: Date, default: Date.now },
     applicationSource: { type: String, default: 'Website' },
     
-    // Rejection details
+    
     rejectionReason: { type: String, default: '' },
     rejectionNotes: { type: String, default: '' },
     rejectedAt: { type: Date, default: null },
     
-    // Interview details
+    
     interviewDate: { type: String, default: '' },
     interviewTime: { type: String, default: '' },
     interviewer: { type: String, default: '' },
     interviewFormat: { type: String, default: 'Video Call (Teams)' },
     interviewScheduledAt: { type: Date, default: null },
     
-    // Offer & Hiring
+    
     offerSentAt: { type: Date, default: null },
     hiredAt: { type: Date, default: null },
     
-    // Current job context
+    
     currentJobId: { type: String, default: '' },
     currentJobTitle: { type: String, default: '' },
 
-    // ============================================
-    // DOCUMENT REQUEST FIELDS
-    // ============================================
+    
+    
+    
     requestedDocuments: { type: [String], default: [] },
     documentRequestNote: { type: String, default: '' },
     documentRequestedAt: { type: Date, default: null },
 
-    // Metadata
+    
     resumeUrl: { type: String, default: '' },
     coverLetterUrl: { type: String, default: '' },
     coverLetter: { type: String, default: '' },
@@ -348,7 +348,7 @@ const candidateSchema = new Schema<ICandidate>(
   }
 );
 
-// Virtuals
+
 candidateSchema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`.trim();
 });
@@ -362,7 +362,7 @@ candidateSchema.virtual('fullAddress').get(function() {
   return parts.join(', ');
 });
 
-// Pre-save hook - Update status history
+
 candidateSchema.pre('save', function(next) {
   if (this.isModified('status')) {
     this.statusHistory.push({
@@ -376,7 +376,7 @@ candidateSchema.pre('save', function(next) {
   next();
 });
 
-// Indexes
+
 candidateSchema.index({ email: 1 });
 candidateSchema.index({ isDeleted: 1 });
 candidateSchema.index({ status: 1 });

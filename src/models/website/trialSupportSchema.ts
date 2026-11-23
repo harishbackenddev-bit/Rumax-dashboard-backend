@@ -1,9 +1,9 @@
-// models/website/trialSupportSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const TrialSupportSchema = new Schema(
   {
-    // Step 1 - Study Details
+    
     studyPhase: {
       type: [String],
       enum: ["Phase I", "Phase II", "Phase III", "Phase IV", "Phase V"],
@@ -15,13 +15,13 @@ const TrialSupportSchema = new Schema(
       default: [],
     },
     
-    // Step 2 - Bottlenecks
+    
     description: {
       type: String,
       default: null,
     },
     
-    // Step 3 - About You
+    
     fullName: {
       type: String,
       required: true,
@@ -64,7 +64,7 @@ const TrialSupportSchema = new Schema(
       default: null,
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Trial Support Form",

@@ -1,9 +1,9 @@
-// models/website/careCostSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const CareCostSchema = new Schema(
   {
-    // Personal Details
+    
     fullName: {
       type: String,
       required: true,
@@ -27,7 +27,7 @@ const CareCostSchema = new Schema(
       uppercase: true,
     },
     
-    // Care Details
+    
     careFrequency: {
       type: String,
       required: true,
@@ -57,7 +57,7 @@ const CareCostSchema = new Schema(
       ],
     },
     
-    // Specialist Care
+    
     dementiaCare: {
       type: Boolean,
       default: false,
@@ -71,13 +71,13 @@ const CareCostSchema = new Schema(
       default: false,
     },
     
-    // Estimated Cost
+    
     estimatedCost: {
       type: String,
       required: true,
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Care Cost Calculator",
@@ -105,7 +105,7 @@ const CareCostSchema = new Schema(
   }
 );
 
-// Add indexes for better query performance
+
 CareCostSchema.index({ email: 1 });
 CareCostSchema.index({ phone: 1 });
 CareCostSchema.index({ postcode: 1 });
@@ -113,19 +113,19 @@ CareCostSchema.index({ status: 1 });
 CareCostSchema.index({ createdAt: -1 });
 CareCostSchema.index({ source: 1 });
 
-// Pre-save middleware to format data
+
 CareCostSchema.pre('save', function(next) {
-  // Format email to lowercase
+  
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
   }
   
-  // Format postcode to uppercase
+  
   if (this.postcode) {
     this.postcode = this.postcode.trim().toUpperCase();
   }
   
-  // Trim all string fields
+  
   if (this.fullName) {
     this.fullName = this.fullName.trim();
   }
@@ -136,7 +136,7 @@ CareCostSchema.pre('save', function(next) {
   next();
 });
 
-// Static method to get statistics
+
 CareCostSchema.statics.getStats = async function() {
   const total = await this.countDocuments();
   const today = new Date();
@@ -176,17 +176,17 @@ CareCostSchema.statics.getStats = async function() {
   };
 };
 
-// Static method to find by email
+
 CareCostSchema.statics.findByEmail = function(email: string) {
   return this.find({ email: email.toLowerCase().trim() });
 };
 
-// Static method to find by status
+
 CareCostSchema.statics.findByStatus = function(status: string) {
   return this.find({ status });
 };
 
-// Static method to find by postcode
+
 CareCostSchema.statics.findByPostcode = function(postcode: string) {
   return this.find({ postcode: postcode.trim().toUpperCase() });
 };

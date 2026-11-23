@@ -1,4 +1,4 @@
-// utils/default-roles.ts
+
 
 export interface IPermission {
   module: string;
@@ -89,7 +89,7 @@ export const defaultRoles: IDefaultRole[] = [
   }
 ];
 
-// Helper function to get default permissions for a module
+
 export const getDefaultPermissionsForModule = (moduleId: string): IPermission => {
   return {
     module: moduleId,
@@ -101,17 +101,17 @@ export const getDefaultPermissionsForModule = (moduleId: string): IPermission =>
   };
 };
 
-// Helper function to check if a role is default
+
 export const isDefaultRole = (roleName: string): boolean => {
   return defaultRoles.some(role => role.name === roleName);
 };
 
-// Helper function to get default role by name
+
 export const getDefaultRoleByName = (roleName: string): IDefaultRole | undefined => {
   return defaultRoles.find(role => role.name === roleName);
 };
 
-// Helper function to get all default role names
+
 export const getDefaultRoleNames = (): string[] => {
   return defaultRoles.map(role => role.name);
 };

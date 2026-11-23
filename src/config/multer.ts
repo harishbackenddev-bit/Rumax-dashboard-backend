@@ -1,9 +1,9 @@
-// src/config/multer.ts
+
 import multer from "multer";
 import path from "path";
 import fs from 'fs';
 
-// Delete file helper function
+
 export const deleteFile = (filePath: string) => {
     try {
         if (fs.existsSync(filePath)) {
@@ -15,7 +15,7 @@ export const deleteFile = (filePath: string) => {
     }
 };
 
-// Ensure upload directory exists - using public/upload/profile
+
 const uploadDir = path.join(process.cwd(), "public/uploads/profiles");
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -26,15 +26,15 @@ const storage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        // Get file extension
+        
         const ext = path.extname(file.originalname);
-        // Create unique filename with timestamp and random number
+        
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, `profile-photo-${uniqueSuffix}${ext}`);
     }
 });
 
-// File filter for images only
+
 const fileFilter = (req: any, file: any, cb: any) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
     if (allowedTypes.includes(file.mimetype)) {
@@ -44,19 +44,19 @@ const fileFilter = (req: any, file: any, cb: any) => {
     }
 };
 
-// Create multer instance with error handling
+
 export const upload = multer({
     storage,
     fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5 MB
+        fileSize: 5 * 1024 * 1024, 
     },
 });
 
-// Export the upload directory for use in other files
+
 export const UPLOAD_DIR = uploadDir;
 
-// Error handler for multer
+
 export const handleMulterError = (err: any) => {
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {

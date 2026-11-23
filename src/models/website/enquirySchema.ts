@@ -1,9 +1,9 @@
-// models/website/enquirySchema.ts
+
 import { Schema, model } from "mongoose";
 
 const EnquirySchema = new Schema(
   {
-    // Common fields
+    
     enquiryType: {
       type: String,
       required: true,
@@ -29,7 +29,7 @@ const EnquirySchema = new Schema(
       default: null,
     },
     
-    // Care enquiry fields
+    
     relationshipToClient: {
       type: String,
       default: null,
@@ -51,7 +51,7 @@ const EnquirySchema = new Schema(
       default: null,
     },
     
-    // Research enquiry fields
+    
     organization: {
       type: String,
       default: null,
@@ -73,7 +73,7 @@ const EnquirySchema = new Schema(
       default: null,
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Enquiry Form",
@@ -101,7 +101,7 @@ const EnquirySchema = new Schema(
   }
 );
 
-// Add indexes for better query performance
+
 EnquirySchema.index({ email: 1 });
 EnquirySchema.index({ phoneNumber: 1 });
 EnquirySchema.index({ enquiryType: 1 });
@@ -109,14 +109,14 @@ EnquirySchema.index({ status: 1 });
 EnquirySchema.index({ createdAt: -1 });
 EnquirySchema.index({ source: 1 });
 
-// Pre-save middleware to format data
+
 EnquirySchema.pre('save', function(next) {
-  // Format email to lowercase
+  
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
   }
   
-  // Trim all string fields
+  
   if (this.fullName) {
     this.fullName = this.fullName.trim();
   }
@@ -130,7 +130,7 @@ EnquirySchema.pre('save', function(next) {
   next();
 });
 
-// Static method to get statistics
+
 EnquirySchema.statics.getStats = async function() {
   const total = await this.countDocuments();
   const today = new Date();
@@ -158,17 +158,17 @@ EnquirySchema.statics.getStats = async function() {
   };
 };
 
-// Static method to find by email
+
 EnquirySchema.statics.findByEmail = function(email: string) {
   return this.find({ email: email.toLowerCase().trim() });
 };
 
-// Static method to find by status
+
 EnquirySchema.statics.findByStatus = function(status: string) {
   return this.find({ status });
 };
 
-// Static method to find by enquiry type
+
 EnquirySchema.statics.findByType = function(type: string) {
   return this.find({ enquiryType: type });
 };

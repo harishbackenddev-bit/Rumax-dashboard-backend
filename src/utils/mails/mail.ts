@@ -2,22 +2,22 @@ import nodemailer from 'nodemailer';
 import { configDotenv } from "dotenv";
 
 configDotenv();
-// At the top of your mail.ts file
+
 console.log('SMTP_USER:', process.env.SMTP_USER);
 console.log('SMTP_PASSWORD:', process.env.SMTP_PASSWORD ? '***SET***' : 'NOT SET');
 console.log('SMTP_HOST:', process.env.SMTP_HOST);
-// Create transporter
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  secure: process.env.SMTP_SECURE === 'true', 
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
 });
 
-// Verify connection
+
 transporter.verify((error, success) => {
   if (error) {
     console.log('SMTP connection error:', error);
@@ -185,7 +185,7 @@ export const sendLatestUpdatesEmail = async (
 };
 
 
-// ===== Add this to your mail.ts (below sendLatestUpdatesEmail) =====
+
 
 const escapeHtml = (value: any): string =>
   String(value ?? "")
@@ -220,7 +220,7 @@ export const sendSupportTicketMailToSupport = async (payload: {
     const categoryLabel =
       payload.category === "website-update" ? "Website update request" : "IT issue";
 
-    // remove line breaks from subject to prevent email header injection
+    
     const safeSubject = String(payload.subject).replace(/[\r\n]+/g, " ").trim();
 
     const row = (label: string, value: string) => `

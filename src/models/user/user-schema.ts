@@ -105,7 +105,7 @@ const usersSchema = new Schema<IUser>(
 
     emailVerified: {
       type: Boolean,
-      default: true, // Changed to true by default
+      default: true, 
     },
 
     isTeamMember: {
@@ -140,7 +140,7 @@ const usersSchema = new Schema<IUser>(
   }
 );
 
-// Virtuals - Only Active and Inactive
+
 usersSchema.virtual('status').get(function() {
   if (!this.isActive) return 'Inactive';
   return 'Active';
@@ -158,7 +158,7 @@ usersSchema.virtual('roleDisplay').get(function() {
   return roleMap[this.role] || this.role;
 });
 
-// Static methods
+
 usersSchema.static('getInitials', function(name: string): string {
   if (!name) return '??';
   const nameParts = name.trim().split(' ');
@@ -173,7 +173,7 @@ usersSchema.static('getColor', function(name: string): string {
   return colors[index];
 });
 
-// Instance methods
+
 usersSchema.method('getUserInitials', function(this: IUser): string {
   if (this.initials) return this.initials;
   return (this.constructor as any).getInitials(this.name);
@@ -184,7 +184,7 @@ usersSchema.method('getUserColor', function(this: IUser): string {
   return (this.constructor as any).getColor(this.name);
 });
 
-// Pre-save middleware
+
 usersSchema.pre<IUser>('save', function(next) {
   if (this.isModified('name')) {
     if (!this.initials) {
@@ -197,7 +197,7 @@ usersSchema.pre<IUser>('save', function(next) {
   next();
 });
 
-// Indexes
+
 usersSchema.index({ email: 1 });
 usersSchema.index({ role: 1 });
 usersSchema.index({ isTeamMember: 1 });

@@ -1,4 +1,4 @@
-// controllers/website/investigatorGuideController.ts
+
 import { Request, Response } from "express";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
@@ -17,7 +17,7 @@ import {
      saveCareCostService
 } from "../../services/website/website";
 
-// ✅ Save form
+
 export const saveInvestigatorGuide = async (req: Request, res: Response) => {
     try {
         const response = await saveInvestigatorGuideService(req.body, req, res);

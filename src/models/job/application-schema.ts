@@ -1,7 +1,7 @@
-// models/application-schema.ts
+
 import { Schema, model, Document } from "mongoose";
 
-// Status history entry
+
 export interface IStatusHistory {
   status: string;
   changedAt: Date;
@@ -14,7 +14,7 @@ export interface IStatusHistory {
   toStatus?: string;
 }
 
-// Interview details
+
 export interface IInterviewDetails {
   date: Date;
   time: string;
@@ -31,7 +31,7 @@ export interface IInterviewDetails {
   rating?: number;
 }
 
-// Offer details
+
 export interface IOfferDetails {
   salary: string;
   startDate: string;
@@ -50,7 +50,7 @@ export interface IOfferDetails {
   negotiationNotes?: string;
 }
 
-// Document request
+
 export interface IDocumentRequest {
   documents: string[];
   note: string;
@@ -65,25 +65,25 @@ export interface IDocumentRequest {
 }
 
 export interface IApplication extends Document {
-  // ============================================
-  // REFERENCES
-  // ============================================
+  
+  
+  
   candidateId: string;
   jobId: string;
   jobTitle: string;
   
-  // ============================================
-  // APPLICATION DETAILS
-  // ============================================
+  
+  
+  
   coverLetter: string;
   additionalNotes: string;
   availableFrom: string;
   expectedSalary: string;
   noticePeriod: string;
   
-  // ============================================
-  // STATUS & TRACKING (MOVED FROM CANDIDATE)
-  // ============================================
+  
+  
+  
   status: 'Pending' | 'Active' | 'In Review' | 'Interview Scheduled' | 'Offer Sent' | 'Hired' | 'Rejected' | 'Standby' | 'Document Requested';
   statusHistory: IStatusHistory[];
   currentStatus: {
@@ -110,25 +110,25 @@ export interface IApplication extends Document {
     documentRequestedAt?: Date;
   };
   
-  // ============================================
-  // SCORE & APPLICATION DATE
-  // ============================================
+  
+  
+  
   score: number;
   applicationDate: Date;
   applicationSource: string;
   
-  // ============================================
-  // REJECTION DETAILS (MOVED FROM CANDIDATE)
-  // ============================================
+  
+  
+  
   rejectionReason: string;
   rejectionNotes: string;
   rejectedBy: string;
   rejectedByName: string;
   rejectedAt: Date;
   
-  // ============================================
-  // INTERVIEW DETAILS (MOVED FROM CANDIDATE)
-  // ============================================
+  
+  
+  
   interviewDetails: IInterviewDetails;
   interviewDate: Date;
   interviewTime: string;
@@ -140,32 +140,32 @@ export interface IApplication extends Document {
   interviewScheduledByName: string;
   interviewScheduledAt: Date;
   
-  // ============================================
-  // OFFER & HIRING (MOVED FROM CANDIDATE)
-  // ============================================
+  
+  
+  
   offerDetails: IOfferDetails;
   offerSentAt: Date;
   hiredAt: Date;
   
-  // ============================================
-  // STANDBY DETAILS (MOVED FROM CANDIDATE)
-  // ============================================
+  
+  
+  
   standbyReason: string;
   standbyDate: Date;
   standbyBy: string;
   standbyByName: string;
   
-  // ============================================
-  // DOCUMENT REQUESTS (MOVED FROM CANDIDATE)
-  // ============================================
+  
+  
+  
   documentRequests: IDocumentRequest[];
   requestedDocuments: string[];
   documentRequestNote: string;
   documentRequestedAt: Date;
   
-  // ============================================
-  // CANDIDATE SNAPSHOT (Store candidate data at application time)
-  // ============================================
+  
+  
+  
   candidateSnapshot: {
     firstName: string;
     lastName: string;
@@ -182,7 +182,7 @@ export interface IApplication extends Document {
     rightToWork: string;
     photoUrl: string;
     
-    // Role & Availability
+    
     positionAppliedFor: string;
     workPreference: string;
     preferredLocations: string[];
@@ -199,7 +199,7 @@ export interface IApplication extends Document {
     ownVehicle: boolean;
     shiftConfirmation: boolean;
     
-    // Qualifications
+    
     education: Array<{
       id: string;
       institution: string;
@@ -232,7 +232,7 @@ export interface IApplication extends Document {
       expiryDate: string;
     }>;
     
-    // Compliance
+    
     references: Array<{
       id: string;
       fullName: string;
@@ -248,13 +248,13 @@ export interface IApplication extends Document {
     disciplinaryAction: boolean;
     unspentConvictions: boolean;
     
-    // Documents
+    
     documents: string[];
     drivingLicenceUrl: string;
     dbsCertificateUrl: string;
     referencesUrl: string;
     
-    // Values & Assessment
+    
     heardFrom: string;
     supportingStatement: string;
     scenarioAnswers: {
@@ -264,15 +264,15 @@ export interface IApplication extends Document {
     };
     coreValues: string[];
     
-    // Resume & Cover Letter
+    
     resumeUrl: string;
     coverLetterUrl: string;
     coverLetter: string;
   };
   
-  // ============================================
-  // JOB SNAPSHOT (Store job details at application time)
-  // ============================================
+  
+  
+  
   jobSnapshot: {
     title: string;
     location: string;
@@ -288,9 +288,9 @@ export interface IApplication extends Document {
     requireReferences: boolean;
   };
   
-  // ============================================
-  // METADATA
-  // ============================================
+  
+  
+  
   createdBy: string;
   createdByName: string;
   updatedBy: string;
@@ -300,11 +300,11 @@ export interface IApplication extends Document {
   updatedAt: Date;
 }
 
-// ============================================
-// SUB-SCHEMAS
-// ============================================
 
-// Status History Schema
+
+
+
+
 const statusHistorySchema = new Schema<IStatusHistory>({
   status: { type: String, required: true },
   changedAt: { type: Date, default: Date.now },
@@ -317,7 +317,7 @@ const statusHistorySchema = new Schema<IStatusHistory>({
   toStatus: { type: String, default: '' }
 });
 
-// Interview Details Schema
+
 const interviewDetailsSchema = new Schema<IInterviewDetails>({
   date: { type: Date, default: null },
   time: { type: String, default: '' },
@@ -342,7 +342,7 @@ const interviewDetailsSchema = new Schema<IInterviewDetails>({
   rating: { type: Number, default: 0 }
 });
 
-// Offer Details Schema
+
 const offerDetailsSchema = new Schema<IOfferDetails>({
   salary: { type: String, default: '' },
   startDate: { type: String, default: '' },
@@ -361,7 +361,7 @@ const offerDetailsSchema = new Schema<IOfferDetails>({
   negotiationNotes: { type: String, default: '' }
 });
 
-// Document Request Schema
+
 const documentRequestSchema = new Schema<IDocumentRequest>({
   documents: { type: [String], default: [] },
   note: { type: String, default: '' },
@@ -379,14 +379,14 @@ const documentRequestSchema = new Schema<IDocumentRequest>({
   responseNote: { type: String, default: '' }
 });
 
-// ============================================
-// MAIN APPLICATION SCHEMA
-// ============================================
+
+
+
 const applicationSchema = new Schema<IApplication>(
   {
-    // ============================================
-    // REFERENCES
-    // ============================================
+    
+    
+    
     candidateId: {
       type: String,
       required: [true, "Candidate ID is required"],
@@ -402,18 +402,18 @@ const applicationSchema = new Schema<IApplication>(
       trim: true
     },
     
-    // ============================================
-    // APPLICATION DETAILS
-    // ============================================
+    
+    
+    
     coverLetter: { type: String, default: '' },
     additionalNotes: { type: String, default: '' },
     availableFrom: { type: String, default: '' },
     expectedSalary: { type: String, default: '' },
     noticePeriod: { type: String, default: '' },
     
-    // ============================================
-    // STATUS & TRACKING (MOVED FROM CANDIDATE)
-    // ============================================
+    
+    
+    
     status: {
       type: String,
       enum: ['Pending', 'Active', 'In Review', 'Interview Scheduled', 'Offer Sent', 'Hired', 'Rejected', 'Standby', 'Document Requested'],
@@ -444,25 +444,25 @@ const applicationSchema = new Schema<IApplication>(
       documentRequestedAt: { type: Date, default: null }
     },
     
-    // ============================================
-    // SCORE & APPLICATION DATE
-    // ============================================
+    
+    
+    
     score: { type: Number, default: 0, min: 0, max: 100 },
     applicationDate: { type: Date, default: Date.now },
     applicationSource: { type: String, default: 'Website' },
     
-    // ============================================
-    // REJECTION DETAILS (MOVED FROM CANDIDATE)
-    // ============================================
+    
+    
+    
     rejectionReason: { type: String, default: '' },
     rejectionNotes: { type: String, default: '' },
     rejectedBy: { type: String, default: '' },
     rejectedByName: { type: String, default: '' },
     rejectedAt: { type: Date, default: null },
     
-    // ============================================
-    // INTERVIEW DETAILS (MOVED FROM CANDIDATE)
-    // ============================================
+    
+    
+    
     interviewDetails: { type: interviewDetailsSchema, default: null },
     interviewDate: { type: Date, default: null },
     interviewTime: { type: String, default: '' },
@@ -478,32 +478,32 @@ const applicationSchema = new Schema<IApplication>(
     interviewScheduledByName: { type: String, default: '' },
     interviewScheduledAt: { type: Date, default: null },
     
-    // ============================================
-    // OFFER & HIRING (MOVED FROM CANDIDATE)
-    // ============================================
+    
+    
+    
     offerDetails: { type: offerDetailsSchema, default: null },
     offerSentAt: { type: Date, default: null },
     hiredAt: { type: Date, default: null },
     
-    // ============================================
-    // STANDBY DETAILS (MOVED FROM CANDIDATE)
-    // ============================================
+    
+    
+    
     standbyReason: { type: String, default: '' },
     standbyDate: { type: Date, default: null },
     standbyBy: { type: String, default: '' },
     standbyByName: { type: String, default: '' },
     
-    // ============================================
-    // DOCUMENT REQUESTS (MOVED FROM CANDIDATE)
-    // ============================================
+    
+    
+    
     documentRequests: [documentRequestSchema],
     requestedDocuments: { type: [String], default: [] },
     documentRequestNote: { type: String, default: '' },
     documentRequestedAt: { type: Date, default: null },
     
-    // ============================================
-    // CANDIDATE SNAPSHOT
-    // ============================================
+    
+    
+    
     candidateSnapshot: {
       firstName: { type: String, default: '' },
       lastName: { type: String, default: '' },
@@ -520,7 +520,7 @@ const applicationSchema = new Schema<IApplication>(
       rightToWork: { type: String, default: '' },
       photoUrl: { type: String, default: '' },
       
-      // Role & Availability
+      
       positionAppliedFor: { type: String, default: '' },
       workPreference: { 
         type: String, 
@@ -541,7 +541,7 @@ const applicationSchema = new Schema<IApplication>(
       ownVehicle: { type: Boolean, default: false },
       shiftConfirmation: { type: Boolean, default: false },
       
-      // Qualifications
+      
       education: [{
         id: { type: String, default: '' },
         institution: { type: String, default: '' },
@@ -574,7 +574,7 @@ const applicationSchema = new Schema<IApplication>(
         expiryDate: { type: String, default: '' }
       }],
       
-      // Compliance
+      
       references: [{
         id: { type: String, default: '' },
         fullName: { type: String, default: '' },
@@ -590,13 +590,13 @@ const applicationSchema = new Schema<IApplication>(
       disciplinaryAction: { type: Boolean, default: false },
       unspentConvictions: { type: Boolean, default: false },
       
-      // Documents
+      
       documents: { type: [String], default: [] },
       drivingLicenceUrl: { type: String, default: '' },
       dbsCertificateUrl: { type: String, default: '' },
       referencesUrl: { type: String, default: '' },
       
-      // Values & Assessment
+      
       heardFrom: { 
         type: String, 
         enum: ['Indeed', 'Total Jobs', 'Internal Referral', 'Company Website', 'Other'],
@@ -610,15 +610,15 @@ const applicationSchema = new Schema<IApplication>(
       },
       coreValues: { type: [String], default: ['Compassion', 'Respect', 'Integrity', 'Continuous Learning', 'Excellence'] },
       
-      // Resume & Cover Letter
+      
       resumeUrl: { type: String, default: '' },
       coverLetterUrl: { type: String, default: '' },
       coverLetter: { type: String, default: '' }
     },
     
-    // ============================================
-    // JOB SNAPSHOT
-    // ============================================
+    
+    
+    
     jobSnapshot: {
       title: { type: String, default: '' },
       location: { type: String, default: '' },
@@ -634,9 +634,9 @@ const applicationSchema = new Schema<IApplication>(
       requireReferences: { type: Boolean, default: false }
     },
     
-    // ============================================
-    // METADATA
-    // ============================================
+    
+    
+    
     createdBy: { type: String, default: '' },
     createdByName: { type: String, default: '' },
     updatedBy: { type: String, default: '' },
@@ -650,9 +650,9 @@ const applicationSchema = new Schema<IApplication>(
   }
 );
 
-// ============================================
-// INDEXES
-// ============================================
+
+
+
 applicationSchema.index({ candidateId: 1, jobId: 1 });
 applicationSchema.index({ candidateId: 1 });
 applicationSchema.index({ jobId: 1 });
@@ -662,9 +662,9 @@ applicationSchema.index({ isDeleted: 1 });
 applicationSchema.index({ lastStatusChange: -1 });
 applicationSchema.index({ 'statusHistory.timestamp': -1 });
 
-// ============================================
-// MIDDLEWARE
-// ============================================
+
+
+
 applicationSchema.pre('findOneAndUpdate', function(next) {
   const update = this.getUpdate() as any;
   if (update.status) {

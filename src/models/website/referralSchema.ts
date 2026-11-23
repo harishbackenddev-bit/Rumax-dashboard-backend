@@ -1,9 +1,9 @@
-// models/website/referralSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const ReferralSchema = new Schema(
   {
-    // Client Details
+    
     clientFullName: {
       type: String,
       required: true,
@@ -40,7 +40,7 @@ const ReferralSchema = new Schema(
       trim: true,
     },
     
-    // Referrer Details
+    
     referrerName: {
       type: String,
       trim: true,
@@ -57,7 +57,7 @@ const ReferralSchema = new Schema(
       default: null,
     },
     
-    // Referral Details
+    
     referralReason: {
       type: String,
       required: true,
@@ -77,7 +77,7 @@ const ReferralSchema = new Schema(
       default: null,
     },
     
-    // File Uploads
+    
     uploadedFile: {
       type: String,
       default: null,
@@ -87,7 +87,7 @@ const ReferralSchema = new Schema(
       default: null,
     },
     
-    // Consents
+    
     consentData: {
       type: Boolean,
       default: false,
@@ -97,7 +97,7 @@ const ReferralSchema = new Schema(
       default: false,
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Referral Form",
@@ -125,7 +125,7 @@ const ReferralSchema = new Schema(
   }
 );
 
-// Add indexes for better query performance
+
 ReferralSchema.index({ email: 1 });
 ReferralSchema.index({ phoneNumber: 1 });
 ReferralSchema.index({ status: 1 });
@@ -133,14 +133,14 @@ ReferralSchema.index({ urgencyLevel: 1 });
 ReferralSchema.index({ createdAt: -1 });
 ReferralSchema.index({ clientFullName: 1 });
 
-// Pre-save middleware to format data
+
 ReferralSchema.pre('save', function(next) {
-  // Format email to lowercase
+  
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
   }
   
-  // Trim all string fields
+  
   if (this.clientFullName) {
     this.clientFullName = this.clientFullName.trim();
   }
@@ -160,7 +160,7 @@ ReferralSchema.pre('save', function(next) {
   next();
 });
 
-// Static method to get statistics
+
 ReferralSchema.statics.getStats = async function() {
   const total = await this.countDocuments();
   const today = new Date();
@@ -188,17 +188,17 @@ ReferralSchema.statics.getStats = async function() {
   };
 };
 
-// Static method to find by email
+
 ReferralSchema.statics.findByEmail = function(email: string) {
   return this.find({ email: email.toLowerCase().trim() });
 };
 
-// Static method to find by status
+
 ReferralSchema.statics.findByStatus = function(status: string) {
   return this.find({ status });
 };
 
-// Static method to find by urgency
+
 ReferralSchema.statics.findByUrgency = function(level: string) {
   return this.find({ urgencyLevel: level });
 };

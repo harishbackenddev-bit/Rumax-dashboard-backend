@@ -1,9 +1,9 @@
-// models/website/domiciliaryAssessmentSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const DomiciliaryAssessmentSchema = new Schema(
   {
-    // Personal Information
+    
     firstName: {
       type: String,
       required: true,
@@ -37,7 +37,7 @@ const DomiciliaryAssessmentSchema = new Schema(
       uppercase: true,
     },
     
-    // Care Details
+    
     relationship: {
       type: String,
       required: true,
@@ -102,14 +102,14 @@ const DomiciliaryAssessmentSchema = new Schema(
       default: null,
     },
     
-    // Consent
+    
     consent: {
       type: Boolean,
       required: true,
       default: false,
     },
     
-    // System fields
+    
     formName: {
       type: String,
       default: "Domiciliary Care Assessment",
@@ -132,7 +132,7 @@ const DomiciliaryAssessmentSchema = new Schema(
   }
 );
 
-// Add indexes for better query performance
+
 DomiciliaryAssessmentSchema.index({ email: 1 });
 DomiciliaryAssessmentSchema.index({ phoneNumber: 1 });
 DomiciliaryAssessmentSchema.index({ postcode: 1 });
@@ -140,14 +140,14 @@ DomiciliaryAssessmentSchema.index({ createdAt: -1 });
 DomiciliaryAssessmentSchema.index({ source: 1 });
 DomiciliaryAssessmentSchema.index({ formName: 1 });
 
-// Pre-save middleware to format data
+
 DomiciliaryAssessmentSchema.pre('save', function(next) {
-  // Format postcode to uppercase and trim
+  
   if (this.postcode) {
     this.postcode = this.postcode.trim().toUpperCase();
   }
   
-  // Trim additional info
+  
   if (this.additionalInfo) {
     this.additionalInfo = this.additionalInfo.trim();
   }

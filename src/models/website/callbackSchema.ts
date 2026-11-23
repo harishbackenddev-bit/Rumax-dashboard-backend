@@ -1,4 +1,4 @@
-// models/website/callbackSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const CallbackSchema = new Schema(
@@ -73,7 +73,7 @@ const CallbackSchema = new Schema(
   }
 );
 
-// Indexes
+
 CallbackSchema.index({ workEmail: 1 });
 CallbackSchema.index({ phoneNumber: 1 });
 CallbackSchema.index({ createdAt: -1 });

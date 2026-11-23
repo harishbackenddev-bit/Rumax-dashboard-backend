@@ -1,4 +1,4 @@
-// models/website/investigatorGuideSchema.ts
+
 import { Schema, model } from "mongoose";
 
 const InvestigatorGuideSchema = new Schema(
@@ -54,7 +54,7 @@ const InvestigatorGuideSchema = new Schema(
   }
 );
 
-// Indexes
+
 InvestigatorGuideSchema.index({ workEmail: 1 });
 InvestigatorGuideSchema.index({ createdAt: -1 });
 

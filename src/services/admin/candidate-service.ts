@@ -19,9 +19,9 @@ export const uploadCandidatePhotoService = async (
         console.log('Uploading photo for candidate:', candidateId);
         console.log('File info:', file);
 
-        // Validate candidate ID
+        
         if (!candidateId || candidateId === 'undefined' || candidateId === 'null') {
-            // Delete uploaded file
+            
             if (file.path) {
                 deleteFile(file.path);
             }
@@ -32,14 +32,14 @@ export const uploadCandidatePhotoService = async (
             );
         }
 
-        // Find the candidate
+        
         const candidate = await candidateModel.findOne({
             _id: candidateId,
             isDeleted: false
         });
 
         if (!candidate) {
-            // Delete uploaded file if candidate not found
+            
             if (file.path) {
                 deleteFile(file.path);
             }
@@ -50,7 +50,7 @@ export const uploadCandidatePhotoService = async (
             );
         }
 
-        // If existing photo exists, delete it from public/upload/profile
+        
         if (candidate.photoUrl) {
             const oldPhotoPath = path.join(process.cwd(), "public/uploads/profiles", path.basename(candidate.photoUrl));
             if (fs.existsSync(oldPhotoPath)) {
@@ -59,10 +59,10 @@ export const uploadCandidatePhotoService = async (
             }
         }
 
-        // Generate the public URL for the uploaded photo
+        
         const photoUrl = `/uploads/profiles/${file.filename}`;
         
-        // Update candidate with photo URL
+        
         candidate.photoUrl = photoUrl;
         await candidate.save();
 
@@ -79,7 +79,7 @@ export const uploadCandidatePhotoService = async (
         };
     } catch (error: any) {
         console.error("Upload photo service error:", error);
-        // Delete uploaded file if error occurs
+        
         if (file && file.path) {
             deleteFile(file.path);
         }
@@ -91,9 +91,9 @@ export const uploadCandidatePhotoService = async (
     }
 };
 
-// ============================================
-// DELETE PHOTO SERVICE - Fixed
-// ============================================
+
+
+
 
 export const deleteCandidatePhotoService = async (candidateId: string, res: Response) => {
     try {
@@ -120,7 +120,7 @@ export const deleteCandidatePhotoService = async (candidateId: string, res: Resp
             );
         }
 
-        // Delete the file from public/upload/profile
+        
         const photoPath = path.join(process.cwd(), "public/uploads/profiles", path.basename(candidate.photoUrl));
         if (fs.existsSync(photoPath)) {
             deleteFile(photoPath);
@@ -146,7 +146,7 @@ export const deleteCandidatePhotoService = async (candidateId: string, res: Resp
         );
     }
 };
-// Get all candidates with pagination and filtering
+
 export const getAllCandidatesService = async (payload: any) => {
   try {
     const page = parseInt(payload.page as string) || 1;
@@ -155,16 +155,16 @@ export const getAllCandidatesService = async (payload: any) => {
 
     const query: any = { isDeleted: false };
 
-    // Filter by status
+    
     if (payload.status) query.status = payload.status;
     
-    // Filter by job ID
+    
     if (payload.jobId) query.jobId = payload.jobId;
     
-    // Filter by candidate ID
+    
     if (payload.candidateId) query.candidateId = payload.candidateId;
 
-    // Search across candidate name, email, job title
+    
     if (payload.search) {
       query.$or = [
         { jobTitle: { $regex: payload.search, $options: "i" } },
@@ -179,7 +179,7 @@ export const getAllCandidatesService = async (payload: any) => {
     const sortOrder = payload.sortOrder === "asc" ? 1 : -1;
     sort[sortField] = sortOrder;
 
-    // Populate candidate details
+    
     const results = await applicationModel.find(query)
       .populate('candidateId', 'firstName lastName email phone addressLine1 city postcode nationality rightToWork')
       .populate('jobId', 'jobTitle location department status')
@@ -202,7 +202,7 @@ export const getAllCandidatesService = async (payload: any) => {
         jobTitle: appObj.jobId?.jobTitle || appObj.jobTitle || 'N/A',
         jobDetails: appObj.jobId || null,
         
-        // Candidate information
+        
         firstName: candidate.firstName || '',
         lastName: candidate.lastName || '',
         fullName: `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Unknown',
@@ -214,7 +214,7 @@ export const getAllCandidatesService = async (payload: any) => {
         nationality: candidate.nationality || '',
         rightToWork: candidate.rightToWork || '',
         
-        // Application details
+        
         status: appObj.status || 'Pending',
         score: appObj.score || 0,
         applicationDate: appObj.applicationDate || appObj.createdAt,
@@ -259,25 +259,25 @@ export const getAllCandidatesService = async (payload: any) => {
 export const getAllstandbyCandidatesService = async (payload: any) => {
   try {
 
-    // console.log("payload", payload)
+    
     const page = parseInt(payload.page as string) || 1;
     const limit = parseInt(payload.limit as string) || 12;
     const skip = (page - 1) * limit;
 
-    // ============================================
-    // BUILD QUERY - ONLY CANDIDATES WITH STATUS 
-    // ============================================
+    
+    
+    
     const query: any = {
       isDeleted: false,
     };
 
-    // Base query - include all statuses by default
-    // or filter by specific status if provided
+    
+    
     if (payload.status) {
-      // If status filter is provided, filter by that specific status
+      
       query.status = payload.status;
     } else {
-      // If no status filter, get all candidates with any of these statuses
+      
       query.$or = [
         { status: "Standby" },
         { status: "Deployed" },
@@ -286,7 +286,7 @@ export const getAllstandbyCandidatesService = async (payload: any) => {
       ];
     }
 
-    // Additional filters
+    
     if (payload.role) {
       query.role = { $regex: payload.role, $options: "i" };
     }
@@ -295,11 +295,11 @@ export const getAllstandbyCandidatesService = async (payload: any) => {
       query.location = { $regex: payload.location, $options: "i" };
     }
 
-    // Search filter - handle both search and $or conflicts
+    
     if (payload.search) {
-      // If we already have $or for status, we need to combine with search
+      
       if (query.$or) {
-        // Combine status $or with search conditions
+        
         const searchConditions = [
           { firstName: { $regex: payload.search, $options: "i" } },
           { lastName: { $regex: payload.search, $options: "i" } },
@@ -307,14 +307,14 @@ export const getAllstandbyCandidatesService = async (payload: any) => {
           { role: { $regex: payload.search, $options: "i" } }
         ];
         
-        // Use $and to combine both conditions
+        
         query.$and = [
           { $or: query.$or },
           { $or: searchConditions }
         ];
         delete query.$or;
       } else {
-        // If no status $or, just add search
+        
         query.$or = [
           { firstName: { $regex: payload.search, $options: "i" } },
           { lastName: { $regex: payload.search, $options: "i" } },
@@ -324,23 +324,23 @@ export const getAllstandbyCandidatesService = async (payload: any) => {
       }
     }
 
-    // Sorting
+    
     const sort: any = {};
     const sortField = payload.sortBy || "createdAt";
     const sortOrder = payload.sortOrder === "asc" ? 1 : -1;
     sort[sortField] = sortOrder;
 
-    // Count total documents
+    
     const totalDataCount = await candidateModel.countDocuments(query);
 
-    // Fetch results
+    
     const results = await candidateModel.find(query)
       .sort(sort)
       .skip(skip)
       .limit(limit)
       .select("-__v");
 
-    // Format results
+    
     const formattedResults = results.map(candidate => ({
       _id: candidate._id,
       firstName: candidate.firstName,
@@ -391,9 +391,9 @@ export const getAllstandbyCandidatesService = async (payload: any) => {
   }
 };
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
+
+
+
 
 const getInitials = (firstName: string, lastName: string): string => {
   if (!firstName && !lastName) return '??';
@@ -414,7 +414,7 @@ const getColor = (name: string): string => {
 };
 
 
-// Get candidate by ID
+
 export const getCandidateService = async (id: string, res: Response) => {
   try {
     const candidate = await candidateModel.findOne({ _id: id, isDeleted: false }).select("-__v");
@@ -441,7 +441,7 @@ export const getCandidateService = async (id: string, res: Response) => {
 };
 
 
-// Create candidate profile
+
 export const createCandidateService = async (payload: any, res: Response) => {
   try {
     const {
@@ -491,7 +491,7 @@ export const createCandidateService = async (payload: any, res: Response) => {
       education: legacyEducation
     } = payload;
 
-    // Check if candidate already exists
+    
     const existingCandidate = await candidateModel.findOne({
       email: email?.toLowerCase().trim(),
       isDeleted: false
@@ -520,7 +520,7 @@ export const createCandidateService = async (payload: any, res: Response) => {
       };
     }
 
-    // Create new candidate
+    
     const newCandidate = new candidateModel({
       firstName: firstName || name?.split(' ')[0] || '',
       lastName: lastName || name?.split(' ').slice(1).join(' ') || '',
@@ -595,7 +595,7 @@ export const createCandidateService = async (payload: any, res: Response) => {
   }
 };
 
-// Apply for job - creates an application
+
 export const applyForJobService = async (payload: any, res: Response) => {
   try {
     const {
@@ -610,13 +610,13 @@ export const applyForJobService = async (payload: any, res: Response) => {
       jobSnapshot
     } = payload;
 
-    // Check if candidate exists
+    
     const candidate = await candidateModel.findOne({ _id: candidateId, isDeleted: false });
     if (!candidate) {
       return errorResponseHandler("Candidate profile not found", httpStatusCode.NOT_FOUND, res);
     }
 
-    // Validate required fields
+    
     if (!jobId) {
       return errorResponseHandler("Job ID is required", httpStatusCode.BAD_REQUEST, res);
     }
@@ -624,7 +624,7 @@ export const applyForJobService = async (payload: any, res: Response) => {
       return errorResponseHandler("Job Title is required", httpStatusCode.BAD_REQUEST, res);
     }
 
-    // Check if already applied
+    
     const existingApplication = await applicationModel.findOne({
       candidateId,
       jobId,
@@ -639,7 +639,7 @@ export const applyForJobService = async (payload: any, res: Response) => {
       );
     }
 
-    // Create application
+    
     const newApplication = new applicationModel({
       candidateId,
       jobId,
@@ -676,7 +676,7 @@ export const applyForJobService = async (payload: any, res: Response) => {
   }
 };
 
-// // Update candidate
+
 
 export const updateCandidateService = async (
   id: string,
@@ -684,9 +684,9 @@ export const updateCandidateService = async (
   res: Response
 ) => {
   try {
-    // ============================================
-    // FIND APPLICATION / CANDIDATE
-    // ============================================
+    
+    
+    
 
     const candidate = await applicationModel.findOne({
       _id: id,
@@ -702,9 +702,9 @@ export const updateCandidateService = async (
     }
 
 
-    // ============================================
-    // FIND MAIN CANDIDATE RECORD
-    // ============================================
+    
+    
+    
 
     if (!candidate.candidateId) {
       return {
@@ -728,9 +728,9 @@ export const updateCandidateService = async (
     }
 
 
-    // ============================================
-    // GET PAYLOAD
-    // ============================================
+    
+    
+    
 
     const {
       status,
@@ -749,9 +749,9 @@ export const updateCandidateService = async (
     } = payload;
 
 
-    // ============================================
-    // VALID STATUSES
-    // ============================================
+    
+    
+    
 
     const validStatuses = [
       "Pending",
@@ -777,23 +777,23 @@ export const updateCandidateService = async (
     }
 
 
-    // ============================================
-    // OLD STATUS
-    // ============================================
+    
+    
+    
 
     const oldStatus = candidate.status || "Pending";
 
 
-    // ============================================
-    // UPDATE APPLICATION STATUS
-    // ============================================
+    
+    
+    
 
     candidate.status = status;
 
 
-    // ============================================
-    // CURRENT JOB INFORMATION
-    // ============================================
+    
+    
+    
 
     if (jobId !== undefined && jobId !== null) {
       candidate.currentJobId = jobId;
@@ -804,9 +804,9 @@ export const updateCandidateService = async (
     }
 
 
-    // ============================================
-    // STATUS SPECIFIC UPDATES
-    // ============================================
+    
+    
+    
 
     switch (status) {
 
@@ -906,25 +906,25 @@ export const updateCandidateService = async (
     }
 
 
-    // ============================================
-    // SAVE APPLICATION
-    // ============================================
+    
+    
+    
 
     await candidate.save();
 
 
-    // ============================================
-    // UPDATE MAIN CANDIDATE
-    // ============================================
+    
+    
+    
 
     candidatemain.status = status;
 
     await candidatemain.save();
 
 
-    // ============================================
-    // EMAIL SETTINGS
-    // ============================================
+    
+    
+    
 
     const noEmailStatuses = [
       "Deployed",
@@ -940,9 +940,9 @@ export const updateCandidateService = async (
     let documentEmailSent = false;
 
 
-    // ============================================
-    // SEND STATUS EMAIL
-    // ============================================
+    
+    
+    
 
     if (shouldSendEmail) {
 
@@ -964,10 +964,10 @@ export const updateCandidateService = async (
         "position";
 
 
-      // --------------------------------------------
-      // IMPORTANT:
-      // Make sure recipient exists
-      // --------------------------------------------
+      
+      
+      
+      
 
       if (!candidateEmail) {
 
@@ -983,7 +983,7 @@ export const updateCandidateService = async (
 
         const emailData = {
 
-          // IMPORTANT
+          
           candidateEmail: candidateEmail,
 
           candidateName: candidateName,
@@ -1048,9 +1048,9 @@ export const updateCandidateService = async (
         }
 
 
-        // ========================================
-        // DOCUMENT REQUEST EMAIL
-        // ========================================
+        
+        
+        
 
         if (
           status === "Document Requested" &&
@@ -1123,9 +1123,9 @@ export const updateCandidateService = async (
     }
 
 
-    // ============================================
-    // RETURN RESPONSE
-    // ============================================
+    
+    
+    
 
     return {
 
@@ -1212,7 +1212,7 @@ export const updateCandidateService = async (
 
 
 
-// Delete candidate (soft delete)
+
 export const deleteCandidateService = async (id: string, res: Response) => {
   try {
     const candidate = await candidateModel.findOne({ _id: id, isDeleted: false });
@@ -1238,7 +1238,7 @@ export const deleteCandidateService = async (id: string, res: Response) => {
   }
 };
 
-// Update candidate status
+
 export const updateCandidateStatusService = async (id: string, status: string, res: Response) => {
   try {
     const candidate = await candidateModel.findOne({ _id: id, isDeleted: false });
@@ -1276,7 +1276,7 @@ export const updateCandidateStatusService = async (id: string, status: string, r
   }
 };
 
-// Get candidate statistics
+
 export const getCandidateStatsService = async () => {
   try {
     const total = await candidateModel.countDocuments({ isDeleted: false });

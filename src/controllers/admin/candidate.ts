@@ -14,7 +14,7 @@ import {
   uploadCandidatePhotoService,
   deleteCandidatePhotoService,
 } from "../../services/admin/candidate-service";
-// Get all candidates
+
 export const getAllCandidates = async (req: Request, res: Response) => {
   try {
     const response = await getAllCandidatesService(req.query);
@@ -48,7 +48,7 @@ export const uploadCandidatePhoto = async (req: Request, res: Response) => {
         const candidateId = req.params.id;
         const file = req.file;
         
-        // Check if file exists
+        
         if (!file) {
             return res.status(httpStatusCode.BAD_REQUEST).json({
                 success: false,
@@ -56,7 +56,7 @@ export const uploadCandidatePhoto = async (req: Request, res: Response) => {
             });
         }
 
-        // Log the uploaded file info for debugging
+        
         console.log('File uploaded:', {
             filename: file.filename,
             path: file.path,
@@ -66,9 +66,9 @@ export const uploadCandidatePhoto = async (req: Request, res: Response) => {
 
         const response = await uploadCandidatePhotoService(candidateId, file, res);
         
-        // Check if response has error
+        
         if (response && response.success === false) {
-            // Delete uploaded file if service failed
+            
             if (file.path && fs.existsSync(file.path)) {
                 deleteFile(file.path);
             }
@@ -78,7 +78,7 @@ export const uploadCandidatePhoto = async (req: Request, res: Response) => {
         return res.status(httpStatusCode.OK).json(response);
     } catch (error: any) {
         console.error('Upload photo controller error:', error);
-        // Delete uploaded file if error occurred
+        
         if (req.file && req.file.path && fs.existsSync(req.file.path)) {
             deleteFile(req.file.path);
         }
@@ -109,7 +109,7 @@ export const deleteCandidatePhoto = async (req: Request, res: Response) => {
     }
 };
 
-// Get candidate by ID
+
 export const getCandidate = async (req: Request, res: Response) => {
   try {
     const response = await getCandidateService(req.params.id, res);
@@ -123,7 +123,7 @@ export const getCandidate = async (req: Request, res: Response) => {
   }
 };
 
-// Create candidate profile
+
 export const createCandidate = async (req: Request, res: Response) => {
   try {
     const response = await createCandidateService(req.body, res);
@@ -142,7 +142,7 @@ export const createCandidate = async (req: Request, res: Response) => {
   }
 };
 
-// Apply for a job
+
 export const applyForJob = async (req: Request, res: Response) => {
   try {
     const response = await applyForJobService(req.body, res);
@@ -165,7 +165,7 @@ export const applyForJob = async (req: Request, res: Response) => {
 
 
 
-// // Update candidate
+
 export const updateCandidate = async (req: Request, res: Response) => {
   try {
     const response = await updateCandidateService(req.params.id, req.body, res);
@@ -184,7 +184,7 @@ export const updateCandidate = async (req: Request, res: Response) => {
   }
 };
 
-// Delete candidate
+
 export const deleteCandidate = async (req: Request, res: Response) => {
   try {
     const response = await deleteCandidateService(req.params.id, res);
@@ -203,7 +203,7 @@ export const deleteCandidate = async (req: Request, res: Response) => {
   }
 };
 
-// Update candidate status
+
 export const updateCandidateStatus = async (req: Request, res: Response) => {
   try {
     const { status } = req.body;
@@ -230,7 +230,7 @@ export const updateCandidateStatus = async (req: Request, res: Response) => {
   }
 };
 
-// Get candidate statistics
+
 export const getCandidateStats = async (req: Request, res: Response) => {
   try {
     const response = await getCandidateStatsService();

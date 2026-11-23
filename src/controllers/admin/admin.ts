@@ -26,7 +26,7 @@ import { z } from "zod";
 import mongoose from "mongoose";
 
 
-//Auth Controllers
+
 export const login = async (req: Request, res: Response) => {
     try {
 
@@ -255,7 +255,7 @@ export const getDefaultRolesList = async (req: Request, res: Response) => {
 };  
 
 
-// Get all jobs
+
 export const getAllJobs = async (req: Request, res: Response) => {
   try {
     const response = await getAllJobsService(req.query);
@@ -269,7 +269,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
   }
 };
 
-// Get job by ID
+
 export const getJobInfo = async (req: Request, res: Response) => {
   try {
     const response = await getJobInfoService(req.params.id, res);
@@ -283,7 +283,7 @@ export const getJobInfo = async (req: Request, res: Response) => {
   }
 };
 
-// Create job
+
 export const createJob = async (req: Request, res: Response) => {
   try {
    const userId = (req as any).currentUser;
@@ -342,7 +342,7 @@ export const Support = async (req: Request, res: Response) => {
 
 
 
-// Update job
+
 export const updateJob = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).currentUser;
@@ -370,7 +370,7 @@ export const updateJob = async (req: Request, res: Response) => {
   }
 };
 
-// Delete job
+
 export const deleteJob = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).currentUser;
@@ -398,7 +398,7 @@ export const deleteJob = async (req: Request, res: Response) => {
   }
 };
 
-// Publish job
+
 export const publishJob = async (req: Request, res: Response) => {
   try {
    const userId = (req as any).currentUser;
@@ -426,7 +426,7 @@ export const publishJob = async (req: Request, res: Response) => {
   }
 };
 
-// Get job statistics
+
 export const getJobStats = async (req: Request, res: Response) => {
   try {
     const response = await getJobStatsService();
