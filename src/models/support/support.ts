@@ -70,6 +70,13 @@ const supportSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    attachments: [
+        {
+            name: { type: String, required: true },
+            url: { type: String, required: true },
+            type: { type: String, default: null }
+        }
+    ],
 
     // Support team handling
     assignedTo: {

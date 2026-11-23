@@ -26,6 +26,21 @@ transporter.verify((error, success) => {
   }
 });
 
+const BACKEND_BASE_URL = (
+  process.env.BACKEND_URL ||
+  process.env.API_URL ||
+  process.env.BASE_URL ||
+  "http://localhost:8000"
+).replace(/\/+$/, "");
+
+const toFullUrl = (url: string): string => {
+  const trimmed = String(url || "").trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `${BACKEND_BASE_URL}${trimmed.startsWith("/") ? trimmed : `/${trimmed}`}`;
+};
+
+
 export const sendPasswordResetEmail = async (email: string, resetLink: string) => {
   try {
     const info = await transporter.sendMail({
@@ -179,13 +194,14 @@ const escapeHtml = (value: any): string =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-
+    
 export const sendSupportTicketMailToSupport = async (payload: {
   ticketId: string;
   category: string;
   priority: string;
   subject: string;
   message: string;
+  attachments?: { name: string; url: string; type?: string | null }[];
   submitterName: string;
   submitterEmail: string;
   pageUrl?: string | null;
@@ -213,6 +229,33 @@ export const sendSupportTicketMailToSupport = async (payload: {
         <td style="padding: 8px; border: 1px solid #ddd; word-break: break-all;">${value}</td>
       </tr>`;
 
+    const attachmentsList = payload.attachments || [];
+    const attachmentsHtml =
+      attachmentsList.length > 0
+        ? `
+          <h3 style="color: #2c3e50; margin-top: 24px;">Attachments (${attachmentsList.length})</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            ${attachmentsList
+              .map((att, index) => {
+                const fullUrl = toFullUrl(att.url);
+                const safeUrl = escapeHtml(fullUrl);
+                const safeName = escapeHtml(att.name || `Attachment ${index + 1}`);
+                const isImage =
+                  (att.type && att.type.startsWith("image/")) ||
+                  /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(fullUrl);
+                const preview = isImage
+                  ? `<div style="margin-top: 8px;"><a href="${safeUrl}" target="_blank" rel="noopener noreferrer"><img src="${safeUrl}" alt="${safeName}" style="max-width: 240px; max-height: 160px; border-radius: 6px; border: 1px solid #ddd;" /></a></div>`
+                  : "";
+                return row(
+                  `File ${index + 1}`,
+                  `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeName}</a>${preview}`
+                );
+              })
+              .join("")}
+          </table>
+        `
+        : "";
+
     const info = await transporter.sendMail({
       from: process.env.COMPANY_EMAIL || process.env.SMTP_USER,
       to: process.env.SUPPORT_EMAIL || "support@blnkc.com",
@@ -237,6 +280,8 @@ export const sendSupportTicketMailToSupport = async (payload: {
             )}
             ${row("Message", escapeHtml(payload.message).replace(/\n/g, "<br>"))}
           </table>
+
+          ${attachmentsHtml}
 
           <h3 style="color: #2c3e50; margin-top: 24px;">Technical details</h3>
           <table style="width: 100%; border-collapse: collapse;">

@@ -23,6 +23,20 @@ import { sendSupportTicketMailToSupport } from "src/utils/mails/mail";
 const CATEGORIES = ["it-issue", "website-update"];
 const PRIORITIES = ["Low", "Medium", "High", "Urgent"];
 
+const BACKEND_BASE_URL = (
+  process.env.BACKEND_URL ||
+  process.env.API_URL ||
+  process.env.BASE_URL ||
+  "http://localhost:8000"
+).replace(/\/+$/, "");
+
+const toFullUrl = (url: string): string => {
+  const trimmed = String(url || "").trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `${BACKEND_BASE_URL}${trimmed.startsWith("/") ? trimmed : `/${trimmed}`}`;
+};
+
 
 export const loginService = async (payload: any, res: Response) => {
     const { username, password } = payload;
@@ -1181,6 +1195,7 @@ export const SupportService = async (payload: any, userId: string, res: Response
       priority,
       subject,
       message,
+      attachments,
       pageUrl,
       userAgent,
       screenSize,
@@ -1220,6 +1235,18 @@ export const SupportService = async (payload: any, userId: string, res: Response
       return errorResponseHandler("Invalid priority.", httpStatusCode.BAD_REQUEST, res);
     }
 
+    // Sanitize attachments array and convert relative paths to full URLs (max 5 items)
+    const sanitizedAttachments = Array.isArray(attachments)
+      ? attachments
+          .filter((item) => item && typeof item.url === "string" && item.url.trim())
+          .slice(0, 5)
+          .map((item) => ({
+            name: String(item.name || "Attachment").slice(0, 200),
+            url: toFullUrl(item.url),
+            type: item.type ? String(item.type).slice(0, 100) : null
+          }))
+      : [];
+
     // Get submitter details from logged in admin
     const admin = await adminModel.findById(userId).select("name email");
     if (!admin) {
@@ -1232,6 +1259,7 @@ export const SupportService = async (payload: any, userId: string, res: Response
       priority: priority || "Medium",
       subject: subject.trim(),
       message: message.trim(),
+      attachments: sanitizedAttachments,
       status: "Open",
       submittedBy: userId,
       submitterName: admin.name,
@@ -1253,6 +1281,7 @@ export const SupportService = async (payload: any, userId: string, res: Response
         priority: newTicket.priority as string,
         subject: newTicket.subject,
         message: newTicket.message,
+        attachments: sanitizedAttachments,
         submitterName: admin.name,
         submitterEmail: admin.email,
         pageUrl: newTicket.pageUrl,
